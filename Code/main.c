@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 //Header file
-#include "symetrie.h"
+#include "retina.h"
 
 int main(int argc, char** argv)
 {

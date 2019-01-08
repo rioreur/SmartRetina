@@ -6,15 +6,20 @@ CFLAGS = -std=c99 -m64 -O3 $(WARNING_FLAGS)
 
 CLIBS = -lm
 
-main: main.o  BmpLib.o OutilsLib.o image.o region.o symetrie.o
+main: main.o  BmpLib.o OutilsLib.o image.o region.o symetrie.o retina.o
 	@echo "Links edition :"
-	gcc -o main main.o  BmpLib.o OutilsLib.o image.o region.o symetrie.o $(CLIBS)
+	gcc -o main main.o  BmpLib.o OutilsLib.o image.o region.o symetrie.o retina.o $(CLIBS)
 	rm -f *~ *.o
 	@echo ""
 
 main.o:	main.c image.h
 	@echo "Compilation main :"
 	gcc $(CFLAGS) -c main.c
+	@echo ""
+
+retina.o: retina.c retina.h symetrie.h
+	@echo "Compilation retina"
+	gcc $(CFLAGS) -c retina.c $(CLIBS)
 	@echo ""
 
 symetrie.o: symetrie.c symetrie.h image.h
