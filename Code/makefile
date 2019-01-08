@@ -6,9 +6,9 @@ CFLAGS = -std=c99 -m64 -O3 $(WARNING_FLAGS)
 
 CLIBS = -lm
 
-main: main.o  BmpLib.o OutilsLib.o image.o quadtree.o region.o
+main: main.o  BmpLib.o OutilsLib.o image.o region.o symetrie.o
 	@echo "Links edition :"
-	gcc -o main main.o  BmpLib.o OutilsLib.o image.o quadtree.o region.o $(CLIBS)
+	gcc -o main main.o  BmpLib.o OutilsLib.o image.o region.o symetrie.o $(CLIBS)
 	rm -f *~ *.o
 	@echo ""
 
@@ -17,14 +17,14 @@ main.o:	main.c image.h
 	gcc $(CFLAGS) -c main.c
 	@echo ""
 
+symetrie.o: symetrie.c symetrie.h image.h
+	@echo "Compilation symetrie :"
+	gcc $(CFLAGS) -c symetrie.c $(CLIBS)
+	@echo ""
+
 region.o: region.c region.h image.h
 	@echo "Compilation region :"
 	gcc $(CFLAGS) -c region.c $(CLIBS)
-	@echo ""
-
-quadtree.o: quadtree.c quadtree.h image.h
-	@echo "Compilation quadtree :"
-	gcc $(CFLAGS) -c quadtree.c $(CLIBS)
 	@echo ""
 
 image.o: image.c image.h BmpLib.h

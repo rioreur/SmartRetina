@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 //Header file
-#include "quadtree.h"
+#include "image.h"
 
 int main(int argc, char** argv)
 {
@@ -32,16 +32,19 @@ int main(int argc, char** argv)
 		printf("Creating the matrice from the image\n");
 		DonneesImageTab* gradiantTabImage = RGBToTab(image);
 		
-		// Test for tree
-		printf("Creating the tree\n");
-		NodeRGB* startingNode = initNodeRGB(0, 0, gradiantTabImage->largeurImage-1, gradiantTabImage->hauteurImage-1);
-		creeArbreRGB(gradiantTabImage, startingNode, 50);
-		etiquetteFeuilleRGB(startingNode, 0);
-		//showTree(startingNode, 0);
+		// Test of the function used to create a hough transform
+		printf("Creating the Hough transformation of the gradiant image\n");
+		DonneesImageTab* tabHough = createHough(gradiantTabImage, 200, 720);
+		DonneesImageRGB* houghImage = houghToRGB(tabHough);
+		ecrisBMPRGB_Dans(houghImage, "9 - hough.bmp");
 		
-		printf(" Creating the image from the tree\n");
-		DonneesImageTab* newTabImage = initTab(gradiantTabImage->largeurImage, gradiantTabImage->hauteurImage);
-		creeMatriceArbreRGB(newTabImage, startingNode, false);
+		// Visualizing the line
+		printf("Drawing the line on a new image\n");
+		Line* line = getMaxLine(tabHough);
+		// Little problems, the lineGradiant1 get a ratio of 0.30 whereas every other as a 0.90 ratio
+		// Probably a problem with the precision...
+		updateLineInfo(gradiantTabImage, line, 200);
+		DonneesImageTab* newTabImage = traceLineOnImage(gradiantTabImage, line, 255, 0, 0);
 		DonneesImageRGB* newImage = tabToRGB(newTabImage);
 		ecrisBMPRGB_Dans(newImage, "newImage.bmp");
 		
@@ -51,8 +54,10 @@ int main(int argc, char** argv)
 		
 		libereDonneesTab(&gradiantTabImage);
 		
-		destructNodeRGB(&startingNode);
-
+		libereDonneesTab(&tabHough);
+		libereDonneesImageRGB(&houghImage);
+		
+		free(line);
 		libereDonneesTab(&newTabImage);
 		libereDonneesImageRGB(&newImage);
 	}

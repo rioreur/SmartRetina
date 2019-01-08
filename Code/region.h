@@ -1,3 +1,5 @@
+// Faire des putain de liste chainé pour les regions
+
 #include "image.h"
 
 #ifndef BORDER
@@ -7,9 +9,41 @@
 	#define UNCHECKED -2
 #endif
 
+//please, a chained list
+typedef struct {
+	// Color of the region
+	int blue;
+	int green;
+	int red;
+	// position of the corresponding seed
+	int x;
+	int y;
+} IdRegion;
+
+typedef struct {
+	IdRegion** regions;
+	int size;
+} IdRegions;
+
 // Returns a DonneesImageTab with all his value set to UNCHECKED
 DonneesImageTab* initTabRegion(int width, int height);
+// Initialisation function
+IdRegion* initIdRegion(int blue, int green, int red, int x, int y);
+IdRegions* initIdRegions(int size);
+// Destruction function
+void destructIdRegions(IdRegions** idRegions);
 
-// Returns a DonneesImageTab which contain the region which the pixel (x, y) is from. The region is in the color of the given pixel.
-void findRegionTopDown(DonneesImageTab* tabImage, DonneesImageTab* tabRegion, int x, int y, int sensibility);
+// Put the region which the pixel (x, y) is from into tabRegion. The region is in the color of the given pixel.
+//returns the color of the said region
+IdRegion* findRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tabRegion, int x, int y, int sensibility);
+// Find all the regions in the image using the BottomUp algorithm and put them in tabRegion
+//return all the idRegion of the different region
+IdRegions* findAllRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tabRegion, int sensibility);
+
+// Find all the regions in the image using the flow algorithm and put them in tabRegion
+//return all the idRegion of the different region
+//Core dumped et parche pas T_T
+IdRegions* findRegionFlow(DonneesImageTab* tabImage, DonneesImageTab* tabRegion, int sensibility);
+// Give the color of a neighboor
+IdRegion* whatIsNeighboorsColor(DonneesImageTab* tabRegion, int x, int y);
 

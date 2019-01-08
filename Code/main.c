@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 //Header file
-#include "quadtree.h"
+#include "symetrie.h"
 
 int main(int argc, char** argv)
 {
@@ -32,29 +32,42 @@ int main(int argc, char** argv)
 		printf("Creating the matrice from the image\n");
 		DonneesImageTab* gradiantTabImage = RGBToTab(image);
 		
-		// Test for tree
-		printf("Creating the tree\n");
-		NodeRGB* startingNode = initNodeRGB(0, 0, gradiantTabImage->largeurImage-1, gradiantTabImage->hauteurImage-1);
-		creeArbreRGB(gradiantTabImage, startingNode, 50);
-		etiquetteFeuilleRGB(startingNode, 0);
-		//showTree(startingNode, 0);
+		// Test for the BottomUp region
+		printf(" Creating the image showing the region using top down method\n");
+		DonneesImageTab* tabRegion = initTabRegion(gradiantTabImage->largeurImage, gradiantTabImage->hauteurImage);
 		
-		printf(" Creating the image from the tree\n");
-		DonneesImageTab* newTabImage = initTab(gradiantTabImage->largeurImage, gradiantTabImage->hauteurImage);
-		creeMatriceArbreRGB(newTabImage, startingNode, false);
-		DonneesImageRGB* newImage = tabToRGB(newTabImage);
+		printf("Checking the circle region\n");
+		IdRegions* allIds = findAllRegionBottomUp(gradiantTabImage, tabRegion, 200);
+		printf(" Number of region found : %d\n", allIds->size);
+		
+		DonneesImageRGB* newImage = tabToRGB(tabRegion);
 		ecrisBMPRGB_Dans(newImage, "newImage.bmp");
+		
+		//test for the Symetries
+		printf("Getting the shape of the circle zone\n");
+		/*DonneesImageTab* tabShape = getShape(tabRegion, allIds->regions[0]);
+		DonneesImageTab* tabSymetricShape = getSymetricShape(tabShape);
+		DonneesImageTab* tabGlobal = createGlobalShape(tabShape, tabSymetricShape);
+		DonneesImageRGB* shapeImage = tabToRGB(tabSymetricShape);
+		ecrisBMPRGB_Dans(shapeImage, "shapeImage.bmp");
+		DonneesImageRGB* borderImage = tabToRGB(tabGlobal);
+		ecrisBMPRGB_Dans(borderImage, "borderImage.bmp");
+		printf(" Symetric ratio : %f\n", ((float) getArea(tabShape))/((float) getArea(tabGlobal)/4));*/
 		
 		// Free of all the tests
 		printf("Freeing the memory\n");
 		libereDonneesImageRGB(&image);
 		
 		libereDonneesTab(&gradiantTabImage);
-		
-		destructNodeRGB(&startingNode);
+		destructIdRegions(&allIds);
 
-		libereDonneesTab(&newTabImage);
+		/*libereDonneesTab(&tabRegion);
 		libereDonneesImageRGB(&newImage);
+		libereDonneesTab(&tabShape);
+		libereDonneesTab(&tabSymetricShape);
+		libereDonneesImageRGB(&shapeImage);
+		libereDonneesTab(&tabGlobal);
+		libereDonneesImageRGB(&borderImage);*/
 	}
 	else
 	{

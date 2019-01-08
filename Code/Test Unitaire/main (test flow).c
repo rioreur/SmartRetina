@@ -56,14 +56,14 @@ int main(int argc, char** argv)
 		DonneesImageRGB* houghImage = houghToRGB(tabHough);
 		ecrisBMPRGB_Dans(houghImage, "9 - hough.bmp");
 		
-		// Test for the region detection with the flow method
-		printf(" Creating the image showing the region using flow method\n");
-		DonneesImageTab* tabRegionFlow = initTabRegion(gradiantTabImage->largeurImage, gradiantTabImage->hauteurImage);
-		printf("Checking the regions\n");
-		findRegionFlow(tabHough, tabRegionFlow);
-		DonneesImageRGB* newImage2 = tabToRGB(tabRegionFlow);
-		ecrisBMPRGB_Dans(newImage2, "newImage2.bmp");
-		
+		// Test of the function used to find region by flooding the image
+		/*printf("Creating the region using a flow method\n");
+		DonneesImageTab* tabRegion = initTabRegion(tabHough->largeurImage, tabHough->hauteurImage);
+		IdRegions* idRegions = findRegionFlow(tabHough, tabRegion);
+		printf("idRegions : %d\n", idRegions->size);
+		DonneesImageRGB* regionImage = tabToRGB(tabRegion);
+		ecrisBMPRGB_Dans(regionImage, "region.bmp");*/
+
 		// Free of all the tests
 		printf("Freeing the memory\n");
 		libereDonneesImageRGB(&image);
@@ -80,8 +80,9 @@ int main(int argc, char** argv)
 		libereDonneesTab(&tabHough);
 		libereDonneesImageRGB(&houghImage);
 		
-		libereDonneesTab(&tabRegionFlow);
-		libereDonneesImageRGB(&newImage2);
+		/*libereDonneesTab(&tabRegion);
+		libereDonneesImageRGB(&regionImage);
+		destructIdRegions(&idRegions);*/
 	}
 	else
 	{

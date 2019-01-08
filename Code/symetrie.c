@@ -1,0 +1,331 @@
+#include "symetrie.h"
+
+
+//core dumped
+DonneesImageTab* getShape(DonneesImageTab* tabRegion,  IdRegion* idRegion)
+{
+	int i, j;
+	DonneesImageTab* tabShape = NULL;
+	bool isInRegion = false;;
+	// Getting the height of the region
+	int startY = tabRegion->hauteurImage;
+	int endY = -1;
+	for (i = 0; i < tabRegion->largeurImage; i++)
+	{
+		isInRegion = false;
+		for (j = 0; j < tabRegion->hauteurImage; j++)
+		{
+			// If we are in the region
+			if (tabRegion->donneesTab[i][j][BLUE] == idRegion->blue && 
+				tabRegion->donneesTab[i][j][GREEN] == idRegion->green &&
+				tabRegion->donneesTab[i][j][RED] == idRegion->red)
+			{
+				// We activate the corresponding flag
+				isInRegion = true;
+				// And we update the startY only if it is lower than the previous one
+				if (startY > j)
+				{
+					startY = j;
+				}
+			}
+			// If we are not in the region and if we where previously
+			if (tabRegion->donneesTab[i][j][BLUE] != idRegion->blue && 
+				tabRegion->donneesTab[i][j][GREEN] != idRegion->green &&
+				tabRegion->donneesTab[i][j][RED] != idRegion->red && 
+				isInRegion)
+			{
+				// We deactivate the corresponding flag
+				isInRegion = false;
+				// And we update the endY only if it is higher than the previous one
+				if (endY < j)
+				{
+					endY = j;
+				}
+			}
+		}
+	}
+	
+	// Getting the width of the region
+	int startX = tabRegion->largeurImage;
+	int endX = -1;
+	for (j = 0; j < tabRegion->hauteurImage; j++)
+	{
+		isInRegion = false;
+		for (i = 0; i < tabRegion->largeurImage; i++)
+		{
+			// If we are in the region
+			if (tabRegion->donneesTab[i][j][BLUE] == idRegion->blue && 
+				tabRegion->donneesTab[i][j][GREEN] == idRegion->green &&
+				tabRegion->donneesTab[i][j][RED] == idRegion->red)
+			{
+				// We activate the corresponding flag
+				isInRegion = true;
+				// And we update the startX only if it is lower than the previous one
+				if (startX > i)
+				{
+					startX = i;
+				}
+			}
+			// If we are not in the region and if we where previously
+			if (tabRegion->donneesTab[i][j][BLUE] != idRegion->blue && 
+				tabRegion->donneesTab[i][j][GREEN] != idRegion->green &&
+				tabRegion->donneesTab[i][j][RED] != idRegion->red && 
+				isInRegion)
+			{
+				// We deactivate the corresponding flag
+				isInRegion = false;
+				// And we update the endX only if it is higher than the previous one
+				if (endX < i)
+				{
+					endX = i;
+				}
+			}
+		}
+	}
+
+	// If we have found the width and the height of the region
+	if (endX >= 0 && endY >= 0 && startX >= 0 && startY >= 0)
+	{
+		// We initialise the DonnesImageTab with the corect lenght
+		tabShape = initTab(endX - startX, endY-startY);
+		// And we fill the region in
+		for (i = 0; i < tabShape->largeurImage; i++)
+		{
+			for (j = 0; j < tabShape->hauteurImage; j++)
+			{
+				if (tabRegion->donneesTab[i + startX][j + startY][BLUE] == idRegion->blue && 
+					tabRegion->donneesTab[i + startX][j + startY][GREEN] == idRegion->green &&
+					tabRegion->donneesTab[i + startX][j + startY][RED] == idRegion->red)
+				{
+					tabShape->donneesTab[i][j][BLUE] = idRegion->blue;
+					tabShape->donneesTab[i][j][GREEN] = idRegion->green;
+					tabShape->donneesTab[i][j][RED] = idRegion->red;
+				}
+				else
+				{
+					tabShape->donneesTab[i][j][BLUE] = UNCHECKED;
+					tabShape->donneesTab[i][j][GREEN] = UNCHECKED;
+					tabShape->donneesTab[i][j][RED] = UNCHECKED;
+				}
+			}
+		}
+		
+	}
+	return tabShape;
+}
+
+DonneesImageTab* getSymetricShape(DonneesImageTab* tabShape)
+{
+	int i, j, cIndex;
+	DonneesImageTab* tabSymetricShape = initTab(tabShape->largeurImage, tabShape->hauteurImage);
+	for (i = 0; i < tabShape->largeurImage; i++)
+	{
+		for (j = 0; j < tabShape->hauteurImage; j++)
+		{
+			for (cIndex = 0; cIndex < 3; cIndex ++)
+			{
+				tabSymetricShape->donneesTab[tabShape->largeurImage - i - 1]
+					[tabShape->hauteurImage - j - 1]
+					[cIndex]
+				 = tabShape->donneesTab[i][j][cIndex];
+			}
+		}
+	}
+	return tabSymetricShape;
+}
+
+DonneesImageTab* createGlobalShape(DonneesImageTab* tabShape, DonneesImageTab* tabSymetricShape)
+{
+	int i, j;
+	int startX = -1;
+	int startY = -1;
+	// This DonneesImageTab is used to create and store the border of the given shape
+	DonneesImageTab* tabBorder = initTabRegion(tabShape->largeurImage, tabShape->hauteurImage);
+	// This DonneesImageTab is used to create and store the gobalShape
+	DonneesImageTab* tabGlobalShape = initTabRegion(tabShape->largeurImage*2, tabShape->hauteurImage*2);
+	
+	// We search for a starting point
+	// For each pixel in the tabShape
+	for (i = 0; i < tabShape->largeurImage; i++)
+	{
+		for (j = 0; j < tabShape->hauteurImage; j++)
+		{
+			// If we find a pixel which is a border
+			if (isABorder(tabShape, i, j))
+			{
+				// We save the point
+				startX = i;
+				startY = j;
+			}
+		}
+	}
+	// If we have found a starting point
+	if (startX >= 0 && startY >= 0)
+	{
+		// use to store the current pixel border. We make it start at the coordinate we previously found
+		int currentX = startX;
+		int currentY = startY;
+		// Use to store the next pixel border
+		int nextX;
+		int nextY;
+		// We start a loop
+		do
+		{
+			// We say that the next pixel in the border isn't define yet
+			nextX = -1;
+			nextY = -1;
+			// For each neighbours
+			for (i = -1; i <= 1; i++)
+			{
+				for (j = -1; j <= 1; j++)
+				{
+					// If it is in the tabShape
+					//and we still haven't found the next border pixel
+					//and the neighbours is an empty pixel
+					//and if it is a border pixel
+					if (0 <= currentX + i && currentX + i < tabShape->largeurImage &&
+						0 <= currentY + j && currentY + j < tabShape->hauteurImage &&
+						nextX == -1 &&
+						nextY == -1 &&
+						tabBorder->donneesTab[currentX + i][currentY + j][BLUE] == UNCHECKED &&
+						tabBorder->donneesTab[currentX + i][currentY + j][GREEN] == UNCHECKED &&
+						tabBorder->donneesTab[currentX + i][currentY + j][RED] == UNCHECKED &&
+						isABorder(tabShape, currentX + i, currentY + j))
+					{
+						// We save the next border pixel
+						nextX = currentX + i;
+						nextY = currentY + j;
+					}
+				}
+			}
+			// We save the current pixel in the tabBorder
+			tabBorder->donneesTab[currentX][currentY][BLUE] = BORDER;
+			tabBorder->donneesTab[currentX][currentY][GREEN] = BORDER;
+			tabBorder->donneesTab[currentX][currentY][RED] = BORDER;
+			// Then we update the current pixel with the next coordonate we found
+			currentX = nextX;
+			currentY = nextY;
+		// We stop if we didn't found a new valid border or if we just get back to the starting point
+		} while(nextX != -1 && nextY != -1 && (nextX != startX || nextY != startY));
+	}
+	
+	// Then, for each pixels
+	for (i = 0; i < tabShape->largeurImage; i++)
+	{
+		for (j = 0; j < tabShape->hauteurImage; j++)
+		{
+			// If it is a border pixel
+			if (tabBorder->donneesTab[i][j][BLUE] == BORDER &&
+				tabBorder->donneesTab[i][j][GREEN] == BORDER &&
+				tabBorder->donneesTab[i][j][RED] == BORDER)
+			{
+				// We draw the shape at each pixel of the border
+				drawShape(tabGlobalShape, tabSymetricShape, i, j);
+			}
+		}
+	}
+	// We free the DonnesImageTab used to store the border
+	libereDonneesTab(&tabBorder);
+	// Then we return the global shape
+	return tabGlobalShape;
+}
+
+bool isABorder(DonneesImageTab* tabShape, int x, int y)
+{
+	bool areEmptyNeighbours = false;
+	// If the pixel to the right is empty
+	if (x + 1 >= tabShape->largeurImage ||
+		(tabShape->donneesTab[x + 1][y][BLUE] == UNCHECKED &&
+		tabShape->donneesTab[x + 1][y][GREEN] == UNCHECKED &&
+		tabShape->donneesTab[x + 1][y][RED] == UNCHECKED))
+	{
+		// We say that their is neighbours
+		areEmptyNeighbours = true;
+	}
+	// If the pixel to the left is empty
+	if (0 > x - 1 ||
+		(tabShape->donneesTab[x - 1][y][BLUE] == UNCHECKED &&
+		tabShape->donneesTab[x - 1][y][GREEN] == UNCHECKED &&
+		tabShape->donneesTab[x - 1][y][RED] == UNCHECKED))
+	{
+		// We say that their is neighbours
+		areEmptyNeighbours = true;
+	}
+	// If the pixel to the bottom is empty
+	if (y + 1 >= tabShape->hauteurImage ||
+		(tabShape->donneesTab[x][y + 1][BLUE] == UNCHECKED &&
+		tabShape->donneesTab[x][y + 1][GREEN] == UNCHECKED &&
+		tabShape->donneesTab[x][y + 1][RED] == UNCHECKED))
+	{
+		// We say that their is neighbours
+		areEmptyNeighbours = true;
+	}
+	// If the pixel to the top is empty
+	if (0 > y - 1 ||
+		(tabShape->donneesTab[x][y - 1][BLUE] == UNCHECKED &&
+		tabShape->donneesTab[x][y - 1][GREEN] == UNCHECKED &&
+		tabShape->donneesTab[x][y - 1][RED] == UNCHECKED))
+	{
+		// We say that their is neighbours
+		areEmptyNeighbours = true;
+	}
+	// If their is empty neighbours and if the pixel isn't empty
+	if (tabShape->donneesTab[x][y][BLUE] != UNCHECKED &&
+		tabShape->donneesTab[x][y][GREEN] != UNCHECKED &&
+		tabShape->donneesTab[x][y][RED] != UNCHECKED &&
+		areEmptyNeighbours)
+	{
+		// Then we are on a border
+		return true;
+	}
+	// Otherwise, we're not
+	return false;
+}
+
+void drawShape(DonneesImageTab* tabImage, DonneesImageTab* tabShape, int x, int y)
+{
+	int i, j;
+	// For each pixel in the tabShape
+	for (i = 0; i < tabShape->largeurImage; i++)
+	{
+		for (j = 0; j < tabShape->hauteurImage; j++)
+		{
+			// If it can be copied to the tabImage
+			//and if it is not empty
+			if (0 <= x + i && x + i < tabImage->largeurImage &&
+				0 <= y + j && y + j < tabImage->hauteurImage &&
+				tabShape->donneesTab[i][j][BLUE] != UNCHECKED &&
+				tabShape->donneesTab[i][j][GREEN] != UNCHECKED &&
+				tabShape->donneesTab[i][j][RED] != UNCHECKED)
+			{
+				// We copy it to the tab
+				tabImage->donneesTab[x + i][y + j][BLUE] = tabShape->donneesTab[i][j][BLUE];
+				tabImage->donneesTab[x + i][y + j][GREEN] = tabShape->donneesTab[i][j][GREEN];
+				tabImage->donneesTab[x + i][y + j][RED] = tabShape->donneesTab[i][j][RED];
+			}
+		}
+	}
+}
+
+int getArea(DonneesImageTab* tabShape)
+{
+	int i, j;
+	// use to store the area of the shape
+	int area = 0;
+	// For each pixel in the tabShape
+	for (i = 0; i < tabShape->largeurImage; i++)
+	{
+		for (j = 0; j < tabShape->hauteurImage; j++)
+		{
+			// If it is not an empty pixel
+			if (tabShape->donneesTab[i][j][BLUE] != UNCHECKED &&
+				tabShape->donneesTab[i][j][GREEN] != UNCHECKED &&
+				tabShape->donneesTab[i][j][RED] != UNCHECKED)
+			{
+				// We increase the area
+				area++;
+			}
+		}
+	}
+	return area;
+}

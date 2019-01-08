@@ -66,6 +66,12 @@ float max(float a, float b)
 	}
 }
 
+int getMax(int* list, int size)
+{
+	qsort(list, size, sizeof(int), pixelComp);
+	return list[size-1];
+}
+
 float min(float a, float b)
 {
 	if (a < b)
@@ -76,6 +82,12 @@ float min(float a, float b)
 	{
 		return b;
 	}
+}
+
+int getMin(int* list, int size)
+{
+	qsort(list, size, sizeof(int), pixelComp);
+	return list[0];
 }
 
 float absValue(float v)
@@ -192,6 +204,19 @@ Filter* initFilter(int width, int height)
 	return filter;
 }
 
+Histogram* initHistogram(int size)
+{
+	Histogram* histogram = malloc(sizeof(Histogram));
+	histogram->values = malloc(sizeof(int) * size);
+	int i;
+	for (i = 0; i < size; i++)
+	{
+		histogram->values[i] = 0;
+	}
+	histogram->size = size;
+	return histogram;
+}
+
 void libereDonneesTab(DonneesImageTab** tabImage)
 {
 	if (tabImage != NULL)
@@ -258,6 +283,19 @@ void destructFilter(Filter** filter)
 	}
 }
 
+void destructHistogram(Histogram** histogram)
+{
+	if (histogram != NULL)
+	{
+		if (*histogram != NULL)
+		{
+			free((*histogram)->values);
+			free(*histogram);
+		}
+		*histogram = NULL;
+	}
+}
+
 DonneesImageTab* RGBToTab(DonneesImageRGB* image)
 {
 	int i, j;
@@ -280,13 +318,64 @@ DonneesImageRGB* tabToRGB(DonneesImageTab* tabImage)
 {
 	DonneesImageRGB* image = initImage(tabImage->largeurImage, tabImage->hauteurImage);
 	int i, j;
+	int max = 0;
 	for(i = 0; i < image->largeurImage; i++)
 	{
 		for(j = 0; j < image->hauteurImage; j++)
 		{
-			image->donneesRGB[(image->largeurImage*j + i) * 3] = tabImage->donneesTab[i][j][BLUE]; //blue
-			image->donneesRGB[(image->largeurImage*j + i) * 3 + 1] = tabImage->donneesTab[i][j][GREEN]; //green
-			image->donneesRGB[(image->largeurImage*j + i) * 3 + 2] = tabImage->donneesTab[i][j][RED]; //red
+			if (tabImage->donneesTab[i][j][BLUE] > max)
+			{
+				max = tabImage->donneesTab[i][j][BLUE];
+			}
+			if (tabImage->donneesTab[i][j][GREEN] > max)
+			{
+				max = tabImage->donneesTab[i][j][GREEN];
+			}
+			if (tabImage->donneesTab[i][j][RED] > max)
+			{
+				max = tabImage->donneesTab[i][j][RED];
+			}
+		}
+	}
+	int min = max;
+	for(i = 0; i < image->largeurImage; i++)
+	{
+		for(j = 0; j < image->hauteurImage; j++)
+		{
+			if (tabImage->donneesTab[i][j][BLUE] < min)
+			{
+				min = tabImage->donneesTab[i][j][BLUE];
+			}
+			if (tabImage->donneesTab[i][j][GREEN] < min)
+			{
+				min = tabImage->donneesTab[i][j][GREEN];
+			}
+			if (tabImage->donneesTab[i][j][RED] < min)
+			{
+				min = tabImage->donneesTab[i][j][RED];
+			}
+		}
+	}
+	
+	if (0 <= max && max < 255)
+	{
+		max = 255;
+	}
+	if (0 <= min && min < 255 && min < max)
+	{
+		min = 0;
+	}
+	
+	for(i = 0; i < image->largeurImage; i++)
+	{
+		for(j = 0; j < image->hauteurImage; j++)
+		{
+			image->donneesRGB[(image->largeurImage*j + i) * 3] = 
+				nmap(tabImage->donneesTab[i][j][BLUE], min, max, 0, 255);
+			image->donneesRGB[(image->largeurImage*j + i) * 3 + 1] = 
+				nmap(tabImage->donneesTab[i][j][GREEN], min, max, 0, 255);
+			image->donneesRGB[(image->largeurImage*j + i) * 3 + 2] = 
+				nmap(tabImage->donneesTab[i][j][RED], min, max, 0, 255);
 		}
 	}
 	return image;
@@ -332,39 +421,84 @@ void makeGreyLevel(DonneesImageTab* tabImage)
 	}
 }
 
-int* createHistogram(DonneesImageTab* tabImage, int color)
+void cutBetweenLevel(DonneesImageTab* tabImage, int min, int max)
 {
-	// We initialize the histogram
-	int* histogram = malloc(sizeof(int) * 256);
 	int i, j;
-	for(i = 0; i < 256; i++)
+	int colorNorm;
+	int minNorm = sqrt(pow(min, 2)*3);
+	int maxNorm = sqrt(pow(max, 2)*3);
+	for (i = 0; i < tabImage->largeurImage; i++)
 	{
-		histogram[i] = 0;
+		for (j = 0; j < tabImage->hauteurImage; j++)
+		{
+			colorNorm = sqrt(pow(tabImage->donneesTab[i][j][BLUE], 2) + 
+				pow(tabImage->donneesTab[i][j][GREEN], 2) +
+				pow(tabImage->donneesTab[i][j][RED], 2));
+			if (colorNorm < minNorm)
+			{
+				tabImage->donneesTab[i][j][BLUE] = min;
+				tabImage->donneesTab[i][j][GREEN] = min;
+				tabImage->donneesTab[i][j][RED] = min;
+			}
+			if (colorNorm > maxNorm)
+			{
+				tabImage->donneesTab[i][j][BLUE] = max;
+				tabImage->donneesTab[i][j][GREEN] = max;
+				tabImage->donneesTab[i][j][RED] = max;
+			}
+				
+		}
 	}
+}
+
+Histogram* createHistogram(DonneesImageTab* tabImage, int color)
+{
+	int i, j;
+	// We search for the maximum value
+	int max = 0;
+	for(i = 0; i < tabImage->largeurImage; i++)
+	{
+		for(j = 0; j < tabImage->hauteurImage; j++)
+		{
+			if (tabImage->donneesTab[i][j][color] > max)
+			{
+				max = tabImage->donneesTab[i][j][color];
+			}
+		}
+	}
+	if (max < 255)
+	{
+		max = 255;
+	}
+	// We initialize the histogram
+	Histogram* histogram = initHistogram(max+1);
 	// For each pixel of the image
 	for(i = 0; i < tabImage->largeurImage; i++)
 	{
 		for(j = 0; j < tabImage->hauteurImage; j++)
 		{
-			// We count up the correct column of the histogram
-			histogram[tabImage->donneesTab[i][j][color]]++;
+			if (tabImage->donneesTab[i][j][color] < max+1)
+			{
+				// We count up the correct column of the histogram
+				histogram->values[tabImage->donneesTab[i][j][color]]++;
+			}
 		}
 	}
 	return histogram;
 }
 
-DonneesImageRGB* histogramToRGB(int* histogram)
+DonneesImageRGB* histogramToRGB(Histogram* histogram)
 {
 	// We init the image which will contain the histogram
-	DonneesImageRGB* image = initImage(256, 256);
+	DonneesImageRGB* image = initImage(histogram->size, 256);
 	int i, j;
 	// We find the maximum value of the histogram
 	int max = 0;
-	for(i = 0; i < 256; i++)
+	for(i = 0; i < histogram->size; i++)
 	{
-		if (histogram[i] > max)
+		if (histogram->values[i] > max)
 		{
-			max = histogram[i];
+			max = histogram->values[i];
 		}
 	}
 	// for each row
@@ -375,7 +509,7 @@ DonneesImageRGB* histogramToRGB(int* histogram)
 		{
 			// We light the pixel in blue if his index is lower than the corresponding histogram column
 			//We use a maped version of the value in the histogram using the maximum value we found previously
-			if (i <= nmap(histogram[j], 0, max, 0, 255))
+			if (i <= nmap(histogram->values[j], 0, max, 0, 255))
 			{
 				image->donneesRGB[(image->largeurImage*i + j) * 3] = 200;
 				image->donneesRGB[(image->largeurImage*i + j) * 3 + 1] = 50;
@@ -485,6 +619,7 @@ Line* getMaxLine(DonneesImageTab* tabHough)
 	maxLine->startY = -1;
 	maxLine->endX = -1;
 	maxLine->endY = -1;
+	maxLine->lenght = 0;
 	maxLine->lenghtRatio = 0;
 	int max = 0;
 	// For each pixel in the Hough matrice
@@ -506,7 +641,7 @@ Line* getMaxLine(DonneesImageTab* tabHough)
 	return maxLine;
 }
 
-float getRatioLine(DonneesImageTab* tabImage, Line* line, int sensibility)
+void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility)
 {
 	float maxR = sqrt(pow(tabImage->largeurImage, 2) + pow(tabImage->largeurImage, 2));
 	float angle = nmap(line->angularIndex, 0, line->maxAngularIndex-1, 0, M_PI);
@@ -574,9 +709,8 @@ float getRatioLine(DonneesImageTab* tabImage, Line* line, int sensibility)
 		line->endX = m*line->endY+n;
 	}
 	float len = sqrt(pow(line->endX-line->startX, 2) + pow(line->endY - line->startY, 2));
+	line->lenght = len;
 	line->lenghtRatio = pixels/len;
-	printf("%f\n", line->lenghtRatio);
-	return line->lenghtRatio;
 }
 
 DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, int g, int b)
@@ -591,7 +725,7 @@ DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, 
 	{
 		m = tan(angle - M_PI/2);
 		n = radius / sin(angle);
-		for(i = 0; i < tabImage->largeurImage; i++)
+		for(i = line->startX; i < line->endX; i += sign(line->endX - line->startX))
 		{
 			j = m*i+n;
 			if (0 <= j && j < tabImage->hauteurImage)
@@ -606,7 +740,7 @@ DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, 
 	{
 		m = -tan(angle);
 		n = radius / cos(angle);
-		for(j = 0; j < tabImage->hauteurImage; j++)
+		for(j = line->startY; j < line->endY; j += sign(line->endY - line->startY))
 		{
 			i = m*j+n;
 			if (0 <= i && i < tabImage->largeurImage)

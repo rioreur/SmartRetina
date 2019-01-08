@@ -83,8 +83,15 @@ typedef struct
 	int endX;
 	int endY;
 	
+	float lenght;
 	float lenghtRatio;
 } Line;
+
+// Use to store histogram information
+typedef struct {
+	int* values;
+	int size;
+} Histogram;
 
 ///////////////////////////
 //--- Maths functions ---//
@@ -98,8 +105,12 @@ float gaussian(float x, float y, int filterSize);
 int pixelComp(void const *p1, void const *p2);
 // Compare two value and returns the greater one
 float max(float a, float b);
+// Compare all the values in the given list and returns the maximum one
+int getMax(int* list, int size);
 // Compare two value and returns the lower one
 float min(float a, float b);
+// Compare all the values in the given list and returns the minimum one
+int getMin(int* list, int size);
 // Return the absolute value of the given number
 float absValue(float v);
 // Return the sign of the given value
@@ -114,10 +125,12 @@ DonneesImageRGB* initImage(int width, int height);
 DonneesImageTab* initTab(int width, int height);
 DonneesImageCube* initCube(int width, int height, int depth, int minRadius, int maxRadius);
 Filter* initFilter(int width, int height);
+Histogram* initHistogram(int size);
 //Destruction function
 void libereDonneesTab(DonneesImageTab** tabImage);
 void libereDonneesCube(DonneesImageCube** cubeImage);
 void destructFilter(Filter** filter);
+void destructHistogram(Histogram** histogram);
 
 /////////////////////////
 //--- Image editing ---//
@@ -131,15 +144,17 @@ DonneesImageTab* cpyTab(DonneesImageTab* tabImage);
 
 // Transform the given DonneesImageTab to a grey level equivalant
 void makeGreyLevel(DonneesImageTab* tabImage);
+// every value above max become 255 and every value below min become 0
+void cutBetweenLevel(DonneesImageTab* tabImage, int min, int max);
 
 /////////////////////
 //--- Histogram ---//
 /////////////////////
 
 // Create an histogram from the given DonneesImageTab for the given color (BLUE, RED or GREEN)
-int* createHistogram(DonneesImageTab* tabImage, int color);
+Histogram* createHistogram(DonneesImageTab* tabImage, int color);
 // Convert the histogram to a DonneesImageRGB
-DonneesImageRGB* histogramToRGB(int* histogram);
+DonneesImageRGB* histogramToRGB(Histogram* histogram);
 
 //////////////////////////
 //--- Line detection ---//
@@ -152,7 +167,7 @@ DonneesImageRGB* houghToRGB(DonneesImageTab* tabHough);
 // Returns the line who appears the most in the given Hough transform
 Line* getMaxLine(DonneesImageTab* tabHough);
 // Returns the ratio of the given line that realy exists on the image and set the coordinates and the ratio of the Line structure
-float getRatioLine(DonneesImageTab* tabImage, Line* line, int sensibility);
+void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility);
 // Create a DonneesImageTab with the given line traced in with the given color
 DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, int g, int b);
 
