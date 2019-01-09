@@ -1,6 +1,5 @@
 #include "image.h"
 
-
 float nmap(float value, float vmin, float vmax, float min, float max)
 {
 	// Original lenght
@@ -547,7 +546,7 @@ DonneesImageTab* createHough(DonneesImageTab* tabImage, int sensibility, int nbr
 {
 	int i, j, cIndex;
 	int r, a;
-	// We calulate the maximum r value possible (distance to the origine)
+	// We calculate the maximum r value possible (distance to the origine)
 	float maxR = sqrt(pow(tabImage->largeurImage, 2) + pow(tabImage->hauteurImage, 2));
 	float angle;
 	// We init the tab that will contain the Hough transform. We use maxR*2 to save the negative values

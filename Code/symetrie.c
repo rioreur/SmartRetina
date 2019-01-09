@@ -1,24 +1,22 @@
 #include "symetrie.h"
 
-
-//core dumped
 DonneesImageTab* getShape(DonneesImageTab* tabRegion,  IdRegion* idRegion)
 {
 	int i, j;
 	DonneesImageTab* tabShape = NULL;
 	bool isInRegion = false;;
 	// Getting the height of the region
-	int startY = tabRegion->hauteurImage;
-	int endY = -1;
+	int startY = tabRegion->hauteurImage; // the maximum Y coordinate wich contain the shape
+	int endY = -1; // the minimum Y coordinate wich contain the shape
 	for (i = 0; i < tabRegion->largeurImage; i++)
 	{
 		isInRegion = false;
 		for (j = 0; j < tabRegion->hauteurImage; j++)
 		{
 			// If we are in the region
-			if (tabRegion->donneesTab[i][j][BLUE] == idRegion->blue && 
-				tabRegion->donneesTab[i][j][GREEN] == idRegion->green &&
-				tabRegion->donneesTab[i][j][RED] == idRegion->red)
+			if (tabRegion->donneesTab[i][j][BLUE] == idRegion->label && 
+				tabRegion->donneesTab[i][j][GREEN] == idRegion->label &&
+				tabRegion->donneesTab[i][j][RED] == idRegion->label)
 			{
 				// We activate the corresponding flag
 				isInRegion = true;
@@ -29,9 +27,9 @@ DonneesImageTab* getShape(DonneesImageTab* tabRegion,  IdRegion* idRegion)
 				}
 			}
 			// If we are not in the region and if we where previously
-			if (tabRegion->donneesTab[i][j][BLUE] != idRegion->blue && 
-				tabRegion->donneesTab[i][j][GREEN] != idRegion->green &&
-				tabRegion->donneesTab[i][j][RED] != idRegion->red && 
+			if (tabRegion->donneesTab[i][j][BLUE] != idRegion->label && 
+				tabRegion->donneesTab[i][j][GREEN] != idRegion->label &&
+				tabRegion->donneesTab[i][j][RED] != idRegion->label && 
 				isInRegion)
 			{
 				// We deactivate the corresponding flag
@@ -54,9 +52,9 @@ DonneesImageTab* getShape(DonneesImageTab* tabRegion,  IdRegion* idRegion)
 		for (i = 0; i < tabRegion->largeurImage; i++)
 		{
 			// If we are in the region
-			if (tabRegion->donneesTab[i][j][BLUE] == idRegion->blue && 
-				tabRegion->donneesTab[i][j][GREEN] == idRegion->green &&
-				tabRegion->donneesTab[i][j][RED] == idRegion->red)
+			if (tabRegion->donneesTab[i][j][BLUE] == idRegion->label && 
+				tabRegion->donneesTab[i][j][GREEN] == idRegion->label &&
+				tabRegion->donneesTab[i][j][RED] == idRegion->label)
 			{
 				// We activate the corresponding flag
 				isInRegion = true;
@@ -67,9 +65,9 @@ DonneesImageTab* getShape(DonneesImageTab* tabRegion,  IdRegion* idRegion)
 				}
 			}
 			// If we are not in the region and if we where previously
-			if (tabRegion->donneesTab[i][j][BLUE] != idRegion->blue && 
-				tabRegion->donneesTab[i][j][GREEN] != idRegion->green &&
-				tabRegion->donneesTab[i][j][RED] != idRegion->red && 
+			if (tabRegion->donneesTab[i][j][BLUE] != idRegion->label && 
+				tabRegion->donneesTab[i][j][GREEN] != idRegion->label &&
+				tabRegion->donneesTab[i][j][RED] != idRegion->label && 
 				isInRegion)
 			{
 				// We deactivate the corresponding flag
@@ -83,6 +81,7 @@ DonneesImageTab* getShape(DonneesImageTab* tabRegion,  IdRegion* idRegion)
 		}
 	}
 
+    printf("%d, %d\n%d, %d\n", startX, endX, startY, endY);
 	// If we have found the width and the height of the region
 	if (endX >= 0 && endY >= 0 && startX >= 0 && startY >= 0)
 	{
@@ -93,9 +92,9 @@ DonneesImageTab* getShape(DonneesImageTab* tabRegion,  IdRegion* idRegion)
 		{
 			for (j = 0; j < tabShape->hauteurImage; j++)
 			{
-				if (tabRegion->donneesTab[i + startX][j + startY][BLUE] == idRegion->blue && 
-					tabRegion->donneesTab[i + startX][j + startY][GREEN] == idRegion->green &&
-					tabRegion->donneesTab[i + startX][j + startY][RED] == idRegion->red)
+				if (tabRegion->donneesTab[i + startX][j + startY][BLUE] == idRegion->label && 
+					tabRegion->donneesTab[i + startX][j + startY][GREEN] == idRegion->label &&
+					tabRegion->donneesTab[i + startX][j + startY][RED] == idRegion->label)
 				{
 					tabShape->donneesTab[i][j][BLUE] = idRegion->blue;
 					tabShape->donneesTab[i][j][GREEN] = idRegion->green;
@@ -328,4 +327,58 @@ int getArea(DonneesImageTab* tabShape)
 		}
 	}
 	return area;
+}
+
+DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility)
+{
+	int x1, y1, x2, y2, cIndex;
+	int r, a;
+	// use for the equation of the axis (y = ax+p)
+	float m;
+	float p;
+	// We calculate the maximum r value possible (distance to the origine)
+	float maxR = sqrt(pow(tabImage->largeurImage, 2) + pow(tabImage->hauteurImage, 2));
+	float angle;
+	// We init the tab that will contain the Hough transform. We use maxR*2 to save the negative values
+	DonneesImageTab* tabAxis = initTab(720, maxR*2);
+	
+	// For each pixel on our image
+	for(x1 = 0; x1 < tabImage->largeurImage; x1++)
+	{
+		for(y1 = 0; y1 < tabImage->hauteurImage; y1++)
+		{
+		    //printf("%d, %d\n", x1, y1);
+			// And for each color
+			for (cIndex = 0; cIndex < 3; cIndex++)
+			{
+				// If the pixel is concidered usefull (superior to the given sensibility)
+				if (tabImage->donneesTab[x1][y1][cIndex] > sensibility)
+				{
+					// For each pixel on our image
+	                for(x2 = 0; x2 < tabImage->largeurImage; x2++)
+	                {
+		                for(y2 = 0; y2 < tabImage->hauteurImage; y2++)
+		                {
+		                    if (x1 != x2 && y1 != y2)
+		                    {
+		                        m = ((float) (x2 - x1)) / ((float) (y2 - y1));
+		                        p = ((float) (y1 + y2))*((float) (x2 - x1)) /
+		                            (((float) (x1 + x2))*((float) (y2 - y1)));
+		                        r = (int) p/sqrt(1 + pow(m, 2)) + maxR;
+		                        angle = atan((y2 - y1)/(x2 - x1));
+		                        if (angle < 0)
+		                        {
+		                            angle += M_PI;
+		                        }
+		                        a = (int) nmap(angle, 0, M_PI, 0, 720);
+		                        // We increase the corresponding value in our Hough table
+						        tabAxis->donneesTab[a][r][cIndex]++;
+						    }
+		                }
+		            }
+				}
+			}
+		}
+	}
+	return tabAxis;
 }
