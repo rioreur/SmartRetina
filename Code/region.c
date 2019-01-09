@@ -375,3 +375,45 @@ IdRegion* whatIsNeighboorsColor(DonneesImageTab* tabRegion, int x, int y)
 	}
 	return idRegion;
 }
+
+Line* getMaxLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabRegion, IdRegion* idRegion)
+{
+    int i, j;
+	Line* maxLine = malloc(sizeof(Line));
+	maxLine->angularIndex = -1;
+	maxLine->rIndex = -1;
+	maxLine->maxRIndex = tabHough->hauteurImage;
+	maxLine->maxAngularIndex = tabHough->largeurImage;
+	maxLine->startX = -1;
+	maxLine->startY = -1;
+	maxLine->endX = -1;
+	maxLine->endY = -1;
+	maxLine->lenght = 0;
+	maxLine->lenghtRatio = 0;
+	int max = 0;
+	// For each pixel in the Hough matrice
+	for(i = 0; i < tabHough->largeurImage; i++)
+	{
+		for(j = 0; j < tabHough->hauteurImage; j++)
+		{
+			if (tabHough->donneesTab[i][j][BLUE] +
+			    tabHough->donneesTab[i][j][GREEN] +
+			    tabHough->donneesTab[i][j][RED] > max &&
+			    tabRegion->donneesTab[i][j][BLUE] == idRegion->blue &&
+			    tabRegion->donneesTab[i][j][GREEN] == idRegion->green &&
+			    tabRegion->donneesTab[i][j][RED] == idRegion->red)
+			{
+				max = tabHough->donneesTab[i][j][BLUE] +
+				    tabHough->donneesTab[i][j][GREEN] +
+				    tabHough->donneesTab[i][j][RED];
+				maxLine->angularIndex = i;
+				maxLine->rIndex = j;
+			}
+		}
+	}
+	if (max == 0)
+	{
+	    return NULL;
+	}
+    return maxLine;
+}

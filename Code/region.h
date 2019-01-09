@@ -42,8 +42,10 @@ IdRegions* findAllRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tab
 
 // Find all the regions in the image using the flow algorithm and put them in tabRegion
 //return all the idRegion of the different region
-//Core dumped et parche pas T_T
 IdRegions* findRegionFlow(DonneesImageTab* tabImage, DonneesImageTab* tabRegion, int sensibility);
 // Give the color of a neighboor
 IdRegion* whatIsNeighboorsColor(DonneesImageTab* tabRegion, int x, int y);
+
+// Returns the line who appears the most in the given Hough transform region
+Line* getMaxLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabRegion, IdRegion* idRegion);
 

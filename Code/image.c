@@ -436,15 +436,15 @@ void cutBetweenLevel(DonneesImageTab* tabImage, int min, int max)
 				pow(tabImage->donneesTab[i][j][RED], 2));
 			if (colorNorm < minNorm)
 			{
-				tabImage->donneesTab[i][j][BLUE] = min;
-				tabImage->donneesTab[i][j][GREEN] = min;
-				tabImage->donneesTab[i][j][RED] = min;
+				tabImage->donneesTab[i][j][BLUE] = 0;
+				tabImage->donneesTab[i][j][GREEN] = 0;
+				tabImage->donneesTab[i][j][RED] = 0;
 			}
 			if (colorNorm > maxNorm)
 			{
-				tabImage->donneesTab[i][j][BLUE] = max;
-				tabImage->donneesTab[i][j][GREEN] = max;
-				tabImage->donneesTab[i][j][RED] = max;
+				tabImage->donneesTab[i][j][BLUE] = 255;
+				tabImage->donneesTab[i][j][GREEN] = 255;
+				tabImage->donneesTab[i][j][RED] = 255;
 			}
 				
 		}
@@ -683,7 +683,6 @@ void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility)
 	{
 		m = -tan(angle);
 		n = radius / cos(angle);
-		
 		for(j = 0; j < tabImage->hauteurImage; j++)
 		{
 			i = m*j+n;
@@ -703,6 +702,7 @@ void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility)
 				tabImage->donneesTab[i][tabImage->hauteurImage-j-1][BLUE] > sensibility && line->endY == -1)
 			{
 				line->endY = tabImage->hauteurImage-j-1;
+				printf("test\n");
 			}
 		}
 		line->startX = m*line->startY+n;
@@ -1105,4 +1105,58 @@ DonneesImageTab* applyGradiantFilterOnTab(DonneesImageTab* tabImage, int type)
 		}
 	}
 	return newTabImage;
+}
+
+void applyDillatationFilter(DonneesImageTab* tabImage, int whiteLevel)
+{
+    int i, j, cIndex;
+    for(i = 0; i < tabImage->largeurImage; i++)
+	{
+		for(j = 0; j < tabImage->hauteurImage; j++)
+		{
+		    for(cIndex = 0; cIndex < 3; cIndex++)
+		    {
+		        if (areNeighboursWhite(tabImage, whiteLevel, i, j))
+		        {
+		            tabImage->donneesTab[i][j][cIndex] = -1;
+		        }
+		    }
+		}
+	}
+	
+	for(i = 0; i < tabImage->largeurImage; i++)
+	{
+		for(j = 0; j < tabImage->hauteurImage; j++)
+		{
+		    for(cIndex = 0; cIndex < 3; cIndex++)
+		    {
+		        if (tabImage->donneesTab[i][j][cIndex] == -1)
+		        {
+		            tabImage->donneesTab[i][j][cIndex] = 255;
+		        }
+		    }
+		}
+	}
+}
+
+bool areNeighboursWhite(DonneesImageTab* tabImage, int whiteLevel, int x, int y)
+{
+    int i, j, cIndex;
+    bool isWhite = false;
+    for(i = -1; i <= 1; i++)
+	{
+		for(j = -1; j <= 1; j++)
+		{
+		    for(cIndex = 0; cIndex < 3; cIndex++)
+		    {
+		        if (0 <= x + i && x + i < tabImage->largeurImage && 
+		            0 <= y + j && y + j < tabImage->hauteurImage &&
+		            tabImage->donneesTab[i][j][cIndex] >= whiteLevel)
+		        {
+		            isWhite = true;
+		        }
+		    }
+		}
+	}
+	return isWhite;
 }

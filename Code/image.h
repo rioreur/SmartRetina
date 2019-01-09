@@ -194,5 +194,6 @@ DonneesImageTab* applyFilterOnTab(DonneesImageTab* tabImage, Filter* filter);
 DonneesImageTab* applyMedianFilterOnTab(DonneesImageTab* tabImage, const int filterWidth, const int filterHeight);
 DonneesImageTab* applyRobertsFilterOnTab(DonneesImageTab* tabImage);
 DonneesImageTab* applyGradiantFilterOnTab(DonneesImageTab* tabImage, int type); //PREWITT or SOBEL
-
+void applyDillatationFilter(DonneesImageTab* tabImage, int whiteLevel);
+bool areNeighboursWhite(DonneesImageTab* tabImage, int whiteLevel, int x, int y);
 
