@@ -2,6 +2,10 @@
 
 //they don't use the idRegion, correct this
 
+////////////////////////////
+//--- Central symmetry ---//
+////////////////////////////
+
 // Returns the region with the given idRegion in a DonneesImageTab with the correct lenght.
 DonneesImageTab* getShape(DonneesImageTab* tabRegion, IdRegion* idRegion);
 // Returns the central symetric of the image
@@ -14,3 +18,12 @@ bool isABorder(DonneesImageTab* tabShape, int x, int y);
 void drawShape(DonneesImageTab* tabImage, DonneesImageTab* tabShape, int x, int y);
 // Give the area in pixels of the given shape
 int getArea(DonneesImageTab* tabShape);
+
+//////////////////////////
+//--- Axial symmetry ---//
+//////////////////////////
+
+// Create a Hough transform from the given DonneesImageTab
+//DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility);
+
+

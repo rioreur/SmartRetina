@@ -126,6 +126,7 @@ DonneesImageTab* initTab(int width, int height);
 DonneesImageCube* initCube(int width, int height, int depth, int minRadius, int maxRadius);
 Filter* initFilter(int width, int height);
 Histogram* initHistogram(int size);
+Line* initLine(int maxRIndex, int maxAngularIndex);
 //Destruction function
 void libereDonneesTab(DonneesImageTab** tabImage);
 void libereDonneesCube(DonneesImageCube** cubeImage);
@@ -168,8 +169,8 @@ DonneesImageRGB* houghToRGB(DonneesImageTab* tabHough);
 Line* getMaxLine(DonneesImageTab* tabHough);
 // Returns the ratio of the given line that realy exists on the image and set the coordinates and the ratio of the Line structure
 void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility);
-// Create a DonneesImageTab with the given line traced in with the given color
-DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, int g, int b);
+// trace the given line on the given DonneesImageTab with the given color
+void traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, int g, int b);
 
 ////////////////////////////
 //--- Circle detection ---//

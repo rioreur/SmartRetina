@@ -217,6 +217,22 @@ Histogram* initHistogram(int size)
 	return histogram;
 }
 
+Line* initLine(int maxRIndex, int maxAngularIndex)
+{
+    Line* line = malloc(sizeof(Line));
+	line->angularIndex = -1;
+	line->rIndex = -1;
+	line->maxRIndex = maxRIndex;
+	line->maxAngularIndex = maxAngularIndex;
+	line->startX = -1;
+	line->startY = -1;
+	line->endX = -1;
+	line->endY = -1;
+	line->lenght = 0;
+	line->lenghtRatio = 0;
+	return line;
+}
+
 void libereDonneesTab(DonneesImageTab** tabImage)
 {
 	if (tabImage != NULL)
@@ -702,7 +718,6 @@ void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility)
 				tabImage->donneesTab[i][tabImage->hauteurImage-j-1][BLUE] > sensibility && line->endY == -1)
 			{
 				line->endY = tabImage->hauteurImage-j-1;
-				printf("test\n");
 			}
 		}
 		line->startX = m*line->startY+n;
@@ -713,14 +728,14 @@ void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility)
 	line->lenghtRatio = pixels/len;
 }
 
-DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, int g, int b)
+void traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, int g, int b)
 {
-	DonneesImageTab* newImage = cpyTab(tabImage);
 	float maxR = sqrt(pow(tabImage->largeurImage, 2) + pow(tabImage->largeurImage, 2));
 	float angle = nmap(line->angularIndex, 0, line->maxAngularIndex-1, 0, M_PI);
 	float radius = nmap(line->rIndex, 0, line->maxRIndex-1, -maxR, maxR);
 	float m, n;
 	int i, j;
+	// Mostly horizontal lines
 	if(M_PI/4 <= angle && angle <= 3*M_PI/4)
 	{
 		m = tan(angle - M_PI/2);
@@ -730,12 +745,13 @@ DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, 
 			j = m*i+n;
 			if (0 <= j && j < tabImage->hauteurImage)
 			{
-				newImage->donneesTab[i][j][BLUE] = b;
-				newImage->donneesTab[i][j][GREEN] = g;
-				newImage->donneesTab[i][j][RED] = r;
+				tabImage->donneesTab[i][j][BLUE] = b;
+				tabImage->donneesTab[i][j][GREEN] = g;
+				tabImage->donneesTab[i][j][RED] = r;
 			}
 		}
 	}
+	// Mostly vertical lines
 	else
 	{
 		m = -tan(angle);
@@ -745,13 +761,12 @@ DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, 
 			i = m*j+n;
 			if (0 <= i && i < tabImage->largeurImage)
 			{
-				newImage->donneesTab[i][j][BLUE] = b;
-				newImage->donneesTab[i][j][GREEN] = g;
-				newImage->donneesTab[i][j][RED] = r;
+				tabImage->donneesTab[i][j][BLUE] = b;
+				tabImage->donneesTab[i][j][GREEN] = g;
+				tabImage->donneesTab[i][j][RED] = r;
 			}
 		}
 	}
-	return newImage;
 }
 
 DonneesImageCube* createRadon(DonneesImageTab* tabImage, int sensibility, int minRadius, int maxRadius, int nbrRadius)
@@ -1123,7 +1138,6 @@ void applyDillatationFilter(DonneesImageTab* tabImage, int whiteLevel)
 		    }
 		}
 	}
-	
 	for(i = 0; i < tabImage->largeurImage; i++)
 	{
 		for(j = 0; j < tabImage->hauteurImage; j++)
@@ -1151,7 +1165,7 @@ bool areNeighboursWhite(DonneesImageTab* tabImage, int whiteLevel, int x, int y)
 		    {
 		        if (0 <= x + i && x + i < tabImage->largeurImage && 
 		            0 <= y + j && y + j < tabImage->hauteurImage &&
-		            tabImage->donneesTab[i][j][cIndex] >= whiteLevel)
+		            tabImage->donneesTab[x + i][y + j][cIndex] >= whiteLevel)
 		        {
 		            isWhite = true;
 		        }
