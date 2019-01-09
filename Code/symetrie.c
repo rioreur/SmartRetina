@@ -329,7 +329,7 @@ int getArea(DonneesImageTab* tabShape)
 	return area;
 }
 
-DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility)
+DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int step)
 {
 	int x1, y1, x2, y2, cIndex;
 	int r, a;
@@ -343,11 +343,11 @@ DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility)
 	DonneesImageTab* tabAxis = initTab(720, maxR*2);
 	
 	// For each pixel on our image
-	for(x1 = 0; x1 < tabImage->largeurImage; x1++)
+	for(x1 = 0; x1 < tabImage->largeurImage; x1+=step)
 	{
-		for(y1 = 0; y1 < tabImage->hauteurImage; y1++)
+		for(y1 = 0; y1 < tabImage->hauteurImage; y1+=step)
 		{
-		    //printf("%d, %d\n", x1, y1);
+		    printf("%d, %d\n", x1, y1);
 			// And for each color
 			for (cIndex = 0; cIndex < 3; cIndex++)
 			{
@@ -355,16 +355,18 @@ DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility)
 				if (tabImage->donneesTab[x1][y1][cIndex] > sensibility)
 				{
 					// For each pixel on our image
-	                for(x2 = 0; x2 < tabImage->largeurImage; x2++)
+	                for(x2 = 0; x2 < tabImage->largeurImage; x2+=step)
 	                {
-		                for(y2 = 0; y2 < tabImage->hauteurImage; y2++)
+		                for(y2 = 0; y2 < tabImage->hauteurImage; y2+=step)
 		                {
 		                    if (x1 != x2 && y1 != y2)
 		                    {
 		                        m = ((float) (x2 - x1)) / ((float) (y2 - y1));
+		                        //p = ((float)(y1+y2))/((float) m*(x1+x2));
 		                        p = ((float) (y1 + y2))*((float) (x2 - x1)) /
 		                            (((float) (x1 + x2))*((float) (y2 - y1)));
-		                        r = (int) p/sqrt(1 + pow(m, 2)) + maxR;
+		                        r = (int) ((-p)/sqrt(1 + pow(m, 2))) + maxR;
+		                        //printf("p : %f, m : %f, r : %d\n", p, m, r);
 		                        angle = atan((y2 - y1)/(x2 - x1));
 		                        if (angle < 0)
 		                        {

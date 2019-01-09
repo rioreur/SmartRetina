@@ -24,5 +24,5 @@ int getArea(DonneesImageTab* tabShape);
 //////////////////////////
 
 // Create a Hough transform from the given DonneesImageTab
-DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility);
+DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int step);
 
