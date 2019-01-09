@@ -217,6 +217,22 @@ Histogram* initHistogram(int size)
 	return histogram;
 }
 
+Line* initLine(int maxRIndex, int maxAngularIndex)
+{
+    Line* line = malloc(sizeof(Line));
+	line->angularIndex = -1;
+	line->rIndex = -1;
+	line->maxRIndex = maxRIndex;
+	line->maxAngularIndex = maxAngularIndex;
+	line->startX = -1;
+	line->startY = -1;
+	line->endX = -1;
+	line->endY = -1;
+	line->lenght = 0;
+	line->lenghtRatio = 0;
+	return line;
+}
+
 void libereDonneesTab(DonneesImageTab** tabImage)
 {
 	if (tabImage != NULL)
@@ -436,15 +452,15 @@ void cutBetweenLevel(DonneesImageTab* tabImage, int min, int max)
 				pow(tabImage->donneesTab[i][j][RED], 2));
 			if (colorNorm < minNorm)
 			{
-				tabImage->donneesTab[i][j][BLUE] = min;
-				tabImage->donneesTab[i][j][GREEN] = min;
-				tabImage->donneesTab[i][j][RED] = min;
+				tabImage->donneesTab[i][j][BLUE] = 0;
+				tabImage->donneesTab[i][j][GREEN] = 0;
+				tabImage->donneesTab[i][j][RED] = 0;
 			}
 			if (colorNorm > maxNorm)
 			{
-				tabImage->donneesTab[i][j][BLUE] = max;
-				tabImage->donneesTab[i][j][GREEN] = max;
-				tabImage->donneesTab[i][j][RED] = max;
+				tabImage->donneesTab[i][j][BLUE] = 255;
+				tabImage->donneesTab[i][j][GREEN] = 255;
+				tabImage->donneesTab[i][j][RED] = 255;
 			}
 				
 		}
@@ -683,7 +699,6 @@ void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility)
 	{
 		m = -tan(angle);
 		n = radius / cos(angle);
-		
 		for(j = 0; j < tabImage->hauteurImage; j++)
 		{
 			i = m*j+n;
@@ -713,14 +728,14 @@ void updateLineInfo(DonneesImageTab* tabImage, Line* line, int sensibility)
 	line->lenghtRatio = pixels/len;
 }
 
-DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, int g, int b)
+void traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, int g, int b)
 {
-	DonneesImageTab* newImage = cpyTab(tabImage);
 	float maxR = sqrt(pow(tabImage->largeurImage, 2) + pow(tabImage->largeurImage, 2));
 	float angle = nmap(line->angularIndex, 0, line->maxAngularIndex-1, 0, M_PI);
 	float radius = nmap(line->rIndex, 0, line->maxRIndex-1, -maxR, maxR);
 	float m, n;
 	int i, j;
+	// Mostly horizontal lines
 	if(M_PI/4 <= angle && angle <= 3*M_PI/4)
 	{
 		m = tan(angle - M_PI/2);
@@ -730,12 +745,13 @@ DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, 
 			j = m*i+n;
 			if (0 <= j && j < tabImage->hauteurImage)
 			{
-				newImage->donneesTab[i][j][BLUE] = b;
-				newImage->donneesTab[i][j][GREEN] = g;
-				newImage->donneesTab[i][j][RED] = r;
+				tabImage->donneesTab[i][j][BLUE] = b;
+				tabImage->donneesTab[i][j][GREEN] = g;
+				tabImage->donneesTab[i][j][RED] = r;
 			}
 		}
 	}
+	// Mostly vertical lines
 	else
 	{
 		m = -tan(angle);
@@ -745,13 +761,12 @@ DonneesImageTab* traceLineOnImage(DonneesImageTab* tabImage, Line* line, int r, 
 			i = m*j+n;
 			if (0 <= i && i < tabImage->largeurImage)
 			{
-				newImage->donneesTab[i][j][BLUE] = b;
-				newImage->donneesTab[i][j][GREEN] = g;
-				newImage->donneesTab[i][j][RED] = r;
+				tabImage->donneesTab[i][j][BLUE] = b;
+				tabImage->donneesTab[i][j][GREEN] = g;
+				tabImage->donneesTab[i][j][RED] = r;
 			}
 		}
 	}
-	return newImage;
 }
 
 DonneesImageCube* createRadon(DonneesImageTab* tabImage, int sensibility, int minRadius, int maxRadius, int nbrRadius)
@@ -1105,4 +1120,57 @@ DonneesImageTab* applyGradiantFilterOnTab(DonneesImageTab* tabImage, int type)
 		}
 	}
 	return newTabImage;
+}
+
+void applyDillatationFilter(DonneesImageTab* tabImage, int whiteLevel)
+{
+    int i, j, cIndex;
+    for(i = 0; i < tabImage->largeurImage; i++)
+	{
+		for(j = 0; j < tabImage->hauteurImage; j++)
+		{
+		    for(cIndex = 0; cIndex < 3; cIndex++)
+		    {
+		        if (areNeighboursWhite(tabImage, whiteLevel, i, j))
+		        {
+		            tabImage->donneesTab[i][j][cIndex] = -1;
+		        }
+		    }
+		}
+	}
+	for(i = 0; i < tabImage->largeurImage; i++)
+	{
+		for(j = 0; j < tabImage->hauteurImage; j++)
+		{
+		    for(cIndex = 0; cIndex < 3; cIndex++)
+		    {
+		        if (tabImage->donneesTab[i][j][cIndex] == -1)
+		        {
+		            tabImage->donneesTab[i][j][cIndex] = 255;
+		        }
+		    }
+		}
+	}
+}
+
+bool areNeighboursWhite(DonneesImageTab* tabImage, int whiteLevel, int x, int y)
+{
+    int i, j, cIndex;
+    bool isWhite = false;
+    for(i = -1; i <= 1; i++)
+	{
+		for(j = -1; j <= 1; j++)
+		{
+		    for(cIndex = 0; cIndex < 3; cIndex++)
+		    {
+		        if (0 <= x + i && x + i < tabImage->largeurImage && 
+		            0 <= y + j && y + j < tabImage->hauteurImage &&
+		            tabImage->donneesTab[x + i][y + j][cIndex] >= whiteLevel)
+		        {
+		            isWhite = true;
+		        }
+		    }
+		}
+	}
+	return isWhite;
 }

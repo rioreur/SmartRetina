@@ -20,7 +20,7 @@ DonneesImageTab* initTabRegion(int width, int height)
 	return tabRegion;
 }
 
-IdRegion* initIdRegion(int blue, int green, int red, int x, int y)
+IdRegion* initIdRegion(int blue, int green, int red, int x, int y, int label)
 {
 	IdRegion* idRegion = malloc(sizeof(IdRegion));
 	idRegion->blue = blue;
@@ -28,6 +28,7 @@ IdRegion* initIdRegion(int blue, int green, int red, int x, int y)
 	idRegion->red = red;
 	idRegion->x = x;
 	idRegion->y = y;
+	idRegion->label = label;
 	return idRegion;
 }
 
@@ -39,7 +40,7 @@ IdRegions* initIdRegions(int size)
 	int i;
 	for (i = 0; i < size; i++)
 	{
-		idRegions->regions[i] = malloc(sizeof(IdRegion));
+		idRegions->regions[i] = NULL;
 	}
 	return idRegions;
 }
@@ -63,7 +64,7 @@ void destructIdRegions(IdRegions** idRegions)
 	}
 }
 
-IdRegion* findRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tabRegion, int x, int y, int sensibility)
+IdRegion* findRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tabRegion, int x, int y, int label, int sensibility)
 {
 	IdRegion* idRegion = NULL;
 	// If the seed is in the image
@@ -76,7 +77,8 @@ IdRegion* findRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tabRegi
 			tabImage->donneesTab[x][y][GREEN],
 			tabImage->donneesTab[x][y][RED],
 			x,
-			y);
+			y,
+			label);
 		int tempColor; // Use to calculate the distance (in colors) between a given pixel and the seed
 		// We set the pixel at the seed's coordinate  in the region matrice to BORDER (-1) to say that it needs to be check
 		tabRegion->donneesTab[x][y][BLUE] = BORDER;
@@ -105,9 +107,9 @@ IdRegion* findRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tabRegi
 						if(tempColor < sensibility)
 						{
 							// We add it to the region matrice
-							tabRegion->donneesTab[i][j][BLUE] = idRegion->blue;
-							tabRegion->donneesTab[i][j][GREEN] = idRegion->green;
-							tabRegion->donneesTab[i][j][RED] = idRegion->red;
+							tabRegion->donneesTab[i][j][BLUE] = idRegion->label;
+							tabRegion->donneesTab[i][j][GREEN] = idRegion->label;
+							tabRegion->donneesTab[i][j][RED] = idRegion->label;
 							// We say that we found a new pixel to add to the region
 							borderFind++;
 							// Then, for each neighbours
@@ -166,6 +168,7 @@ IdRegions* findAllRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tab
 	IdRegion* tempIdRegion = NULL;
 	int i, j;
 	int k;
+	int label = 0;
 	// Use to know the number of region found
 	int nbrRegion = 0;
 	
@@ -180,7 +183,9 @@ IdRegions* findAllRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tab
 				tabRegion->donneesTab[i][j][RED] == UNCHECKED)
 			{
 				// We find the region which contain the starting point
-				tempIdRegion = findRegionBottomUp(tabImage, tabRegion, i, j, sensibility);
+				tempIdRegion = findRegionBottomUp(tabImage, tabRegion, i, j, label, sensibility);
+				// We change the label
+				label++;
 				// We say that we find one more region
 				nbrRegion++;
 				
@@ -289,7 +294,8 @@ IdRegions* findRegionFlow(DonneesImageTab* tabImage, DonneesImageTab* tabRegion,
 								label,
 								label,
 								-1,
-								-1);
+								-1,
+								label);
 						}
 						// We increase the total number of region found
 						nbrRegion++;
@@ -374,4 +380,31 @@ IdRegion* whatIsNeighboorsColor(DonneesImageTab* tabRegion, int x, int y)
 		}
 	}
 	return idRegion;
+}
+
+Line* getCenterLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabRegion, IdRegion* idRegion)
+{
+    int i, j;
+	Line* centerLine = initLine(tabHough->hauteurImage, tabHough->largeurImage);
+	int nbrLine = 0;
+	int angular = 0;
+	int radius = 0;
+	// For each pixel in the Hough matrice
+	for(i = 0; i < tabHough->largeurImage; i++)
+	{
+		for(j = 0; j < tabHough->hauteurImage; j++)
+		{
+			if (tabRegion->donneesTab[i][j][BLUE] == idRegion->label &&
+			    tabRegion->donneesTab[i][j][GREEN] == idRegion->label &&
+			    tabRegion->donneesTab[i][j][RED] == idRegion->label)
+			{
+				nbrLine++;
+				angular += i;
+				radius += j;
+			}
+		}
+	}
+	centerLine->angularIndex = angular/nbrLine;
+	centerLine->rIndex = radius/nbrLine;
+    return centerLine;
 }
