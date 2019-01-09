@@ -32,6 +32,63 @@ int randomIntBetween(int minValue, int maxValue)
 
 
 /* @fonction
+ *      Renvoie une coneType aléatoire
+ *      en respectant la répartition LMS dans une fovéa
+ * 
+ * @param
+ *      \
+ * 
+ * @retour
+ *      coneType : type du cône
+ */
+coneType getRandomConeType(void)
+{
+    int value = randomIntBetween(1, 100);
+    if(value <= S_CONES_PERCENT)
+        return SHORT;
+    if(value <= S_CONES_PERCENT + M_CONES_PERCENT)
+        return MEDIUM;
+    return LONG;
+}
+
+
+/* @fonction
+ *      Renvoie une structure Cone aléatoire
+ *      en respectant la répartition LMS dans une fovéa
+ * 
+ * @param
+ *      \
+ * 
+ * @retour
+ *      Cone : structure Cone
+ */
+Cone getRandomCone(void)
+{
+    Cone newCone;
+    newCone.type = getRandomConeType();
+    
+    if(newCone.type == LONG)
+    {
+        newCone.minHue = 360 - HSV_RANGE;
+        newCone.maxHue = HSV_LONG + HSV_RANGE - 1;
+    }
+    else if(newCone.type == MEDIUM)
+    {
+        newCone.minHue = HSV_MEDIUM - HSV_RANGE;
+        newCone.maxHue = HSV_MEDIUM + HSV_RANGE - 1;
+    }
+    else if(newCone.type == SHORT)
+    {
+        newCone.minHue = HSV_SHORT - HSV_RANGE;
+        newCone.maxHue = HSV_SHORT + HSV_RANGE - 1;
+    }
+
+    newCone.valueThreshold = 10;
+
+    return newCone;
+}
+
+/* @fonction
  *      Crée une matrice DonneesImageTab contenant le résultat
  *      de l'image filtrée par la rétine
  * 
@@ -53,6 +110,7 @@ DonneesImageTab* applyRetina(DonneesImageTab image)
     {
         for(heightIndex = 0; heightIndex < image.hauteurImage; heightIndex++)
         {
+
             //Pour chaque point, convertis son RVB en HSV
             //Génère 9 photorécepteurs
             //Applique les au voisinage
