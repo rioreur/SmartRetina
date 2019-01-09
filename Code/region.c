@@ -185,7 +185,7 @@ IdRegions* findAllRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tab
 				// We find the region which contain the starting point
 				tempIdRegion = findRegionBottomUp(tabImage, tabRegion, i, j, label, sensibility);
 				// We change the label
-				label++;
+				label+=10;
 				// We say that we find one more region
 				nbrRegion++;
 				
@@ -408,3 +408,91 @@ Line* getCenterLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabReg
 	centerLine->rIndex = radius/nbrLine;
     return centerLine;
 }
+
+Point** getAllGravityPoints(DonneesImageTab* tabRegion, IdRegions *allIds)
+{
+	int id;
+	
+	int x;
+	int y;
+	
+	int label;
+	
+	int sommeX;
+	int compteurX;
+	
+	int sommeY;
+	int compteurY;
+	
+	Point** tabPoints = (Point**)malloc(sizeof(Point*) * ((allIds->size)-1) );
+	for(x = 0; x < ((allIds->size)-1); x++)
+	{
+		tabPoints[x] = (Point*)malloc(sizeof(Point));
+	}
+	
+	for(id = 1; id < allIds->size; id++)
+	{
+		sommeX = 0;
+		compteurX = 0;
+		sommeY = 0;
+		compteurY = 0;
+		
+		label = allIds->regions[id]->label;
+		
+		for(y = 0; y < tabRegion->hauteurImage; y++)
+		{
+			for(x = 0; x < tabRegion->largeurImage; x++)
+			{
+				if(tabRegion->donneesTab[x][y][RED] == label)
+				{
+					sommeX = sommeX + x;
+					compteurX++;
+					
+					sommeY = sommeY + y;
+					compteurY++;
+				}
+			}
+		}
+		
+		tabPoints[id-1]->x = sommeX / compteurX;
+		tabPoints[id-1]->y = sommeY / compteurY;
+		tabPoints[id-1]->label = label;
+		tabPoints[id-1]->coef = -1;
+	}
+	
+	return(tabPoints);
+}
+
+void colorGravityPointRegions(DonneesImageTab* tabRegion, Point** tabPoints, int size)
+{
+	int index;
+	
+	for(index = 0; index < size; index++)
+	{
+		if(tabPoints[index]->coef == -1)
+		{
+			//Colorise the gravity center
+			tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][RED] = 255;
+		}
+	}
+}
+
+void destructTabPoints(Point*** tabPoints, int size)
+{
+	int index;
+	
+	for(index = 0; index < size; index++)
+	{
+		free((*tabPoints)[index]);
+	}
+	free((*tabPoints));
+	tabPoints = NULL;
+}
+
+
+
+
+
+
+
+

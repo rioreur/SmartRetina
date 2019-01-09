@@ -51,3 +51,9 @@ IdRegion* whatIsNeighboorsColor(DonneesImageTab* tabRegion, int x, int y);
 // Returns the line who appears the most in the given Hough transform region
 Line* getCenterLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabRegion, IdRegion* idRegion);
 
+Point** getAllGravityPoints(DonneesImageTab* tabRegion, IdRegions *allIds);
+
+void colorGravityPointRegions(DonneesImageTab* tabRegion, Point** tabPoints, int size);
+
+void destructTabPoints(Point*** tabPoints, int size);
+

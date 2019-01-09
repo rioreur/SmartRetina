@@ -40,14 +40,20 @@ int main(int argc, char** argv)
 		IdRegions* allIds = findAllRegionBottomUp(gradiantTabImage, tabRegion, 200);
 		printf(" Number of region found : %d\n", allIds->size);
 		
+		Point** tabPoints = getAllGravityPoints(tabRegion, allIds);
+		
+		colorGravityPointRegions(tabRegion, tabPoints, (allIds->size)-1);
+		
 		DonneesImageRGB* newImage = tabToRGB(tabRegion);
 		ecrisBMPRGB_Dans(newImage, "newImage.bmp");
 		
 		//test for the Symetries
 		printf("Getting the shape of the circle zone\n");
 		DonneesImageTab* tabShape = getShape(tabRegion, allIds->regions[1]);
+				
 		DonneesImageRGB* shapeImage = tabToRGB(tabShape);
 		ecrisBMPRGB_Dans(shapeImage, "shapeImage.bmp");
+		
 		/*DonneesImageTab* tabSymetricShape = getSymetricShape(tabShape);
 		DonneesImageTab* tabGlobal = createGlobalShape(tabShape, tabSymetricShape);
 		DonneesImageRGB* shapeImage = tabToRGB(tabSymetricShape);
@@ -61,8 +67,9 @@ int main(int argc, char** argv)
 		libereDonneesImageRGB(&image);
 		
 		libereDonneesTab(&gradiantTabImage);
+		destructTabPoints(&tabPoints, (allIds->size)-1);
 		destructIdRegions(&allIds);
-
+		
 		libereDonneesTab(&tabRegion);
 		libereDonneesImageRGB(&newImage);
 		libereDonneesTab(&tabShape);
