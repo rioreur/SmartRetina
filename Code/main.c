@@ -15,6 +15,11 @@
 
 int main(int argc, char** argv)
 {
+	//Initialize random with a seed
+	printf("Initializing random with a seed\n");
+	srand(10495854);
+	
+
 	// We get the image we will use for the test
 	printf("Reading the image\n");
 	DonneesImageRGB* image = NULL;
@@ -30,44 +35,21 @@ int main(int argc, char** argv)
 	{
 		// Create the tab from the image
 		printf("Creating the matrice from the image\n");
-		DonneesImageTab* gradiantTabImage = RGBToTab(image);
+		DonneesImageTab* tabImage = RGBToTab(image);
 		
-		// Test for the BottomUp region
-		printf(" Creating the image showing the region using top down method\n");
-		DonneesImageTab* tabRegion = initTabRegion(gradiantTabImage->largeurImage, gradiantTabImage->hauteurImage);
-		
-		printf("Checking the circle region\n");
-		IdRegions* allIds = findAllRegionBottomUp(gradiantTabImage, tabRegion, 200);
-		printf(" Number of region found : %d\n", allIds->size);
-		
-		DonneesImageRGB* newImage = tabToRGB(tabRegion);
+		// Filter the image through retina
+		printf("Going through the retina\n");
+		DonneesImageTab* filteredImage = applyRetina(*tabImage);
+
+		// Create the new image
+		DonneesImageRGB* newImage = tabToRGB(filteredImage);
 		ecrisBMPRGB_Dans(newImage, "newImage.bmp");
 		
-		//test for the Symetries
-		printf("Getting the shape of the circle zone\n");
-		/*DonneesImageTab* tabShape = getShape(tabRegion, allIds->regions[0]);
-		DonneesImageTab* tabSymetricShape = getSymetricShape(tabShape);
-		DonneesImageTab* tabGlobal = createGlobalShape(tabShape, tabSymetricShape);
-		DonneesImageRGB* shapeImage = tabToRGB(tabSymetricShape);
-		ecrisBMPRGB_Dans(shapeImage, "shapeImage.bmp");
-		DonneesImageRGB* borderImage = tabToRGB(tabGlobal);
-		ecrisBMPRGB_Dans(borderImage, "borderImage.bmp");
-		printf(" Symetric ratio : %f\n", ((float) getArea(tabShape))/((float) getArea(tabGlobal)/4));*/
 		
 		// Free of all the tests
 		printf("Freeing the memory\n");
 		libereDonneesImageRGB(&image);
-		
-		libereDonneesTab(&gradiantTabImage);
-		destructIdRegions(&allIds);
-
-		/*libereDonneesTab(&tabRegion);
-		libereDonneesImageRGB(&newImage);
-		libereDonneesTab(&tabShape);
-		libereDonneesTab(&tabSymetricShape);
-		libereDonneesImageRGB(&shapeImage);
-		libereDonneesTab(&tabGlobal);
-		libereDonneesImageRGB(&borderImage);*/
+		libereDonneesTab(&tabImage);
 	}
 	else
 	{
