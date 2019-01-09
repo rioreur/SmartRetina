@@ -1,4 +1,4 @@
-#include "hsv.h"
+﻿#include "hsv.h"
 
 //------FONCTION HSV
 //################################
@@ -19,28 +19,32 @@ float minColor(float r, float g, float b)
 
 float hue(float r, float g, float b, float delta)
 {
-	float max ; 
+	float max, h ; 
 	// min ;
 	max = maxColor(r,g,b);
 	// min = minColor(r,g,b);
 	
 	if(delta == 0)
 	{
-		return 0 ;
+		h = 0 ;
 	}
 	else if(max == r)
 	{
-		return 60 * ( fmodf(((g - b ) / delta),6) ) ;
+		h =  60 * (((g - b ) / delta))  ;
 	}
 	else if (max == g)
 	{
-		return 60 * (((b - r ) / delta) + 2 ) ; 
+		h = 60 * (((b - r ) / delta) + 2 ) ; 
 	}
 	else if (max == b)
 	{
-		return 60 * (((r - g) / delta) + 4 ) ; 
+		h = 60 * (((r - g) / delta) + 4 ) ; 
 	}
-	return -1 ; 
+	if(h<0)
+	{
+		h = h + 360 ;
+	}
+	return h ; 
 }
 
 float saturation(float cmax, float delta)
