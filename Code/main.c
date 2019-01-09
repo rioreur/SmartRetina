@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 		
 		// Test of the function used to create a hough transform
 		printf("Creating the Hough transformation of the gradiant image\n");
-		DonneesImageTab* tabHough = createTabAxis(gradiantTabImage, 250, 5);
+		DonneesImageTab* tabHough = createTabAxis(gradiantTabImage, 100, 1);
 		printf(" Creating the image of the hough transform\n");
 		DonneesImageRGB* houghImage = houghToRGB(tabHough);
 		ecrisBMPRGB_Dans(houghImage, "2 - hough.bmp");

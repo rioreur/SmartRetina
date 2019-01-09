@@ -366,7 +366,7 @@ DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int s
 		                        p = ((float) (y1 + y2))*((float) (x2 - x1)) /
 		                            (((float) (x1 + x2))*((float) (y2 - y1)));
 		                        r = (int) ((-p)/sqrt(1 + pow(m, 2))) + maxR;
-		                        //printf("p : %f, m : %f, r : %d\n", p, m, r);
+		                        printf("p : %f, m : %f, r : %d\n", p, m, r);
 		                        angle = atan((y2 - y1)/(x2 - x1));
 		                        if (angle < 0)
 		                        {
