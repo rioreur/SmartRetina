@@ -1,10 +1,9 @@
 #include "region.h"
 
-DonneesImageTab* initTabRegion(int width, int height)
+DonneesImageTab* initTabRegion(int width, int height, int value)
 {
 	// We initialize a DonneesImageTab using the initTab function
 	DonneesImageTab* tabRegion = initTab(width, height);
-	// Then we put all the value in it at UNCHECKED (-2)
 	int i, j, cIndex;
 	for(i = 0; i < width; i++)
 	{
@@ -12,7 +11,7 @@ DonneesImageTab* initTabRegion(int width, int height)
 		{
 			for(cIndex = 0; cIndex < 3; cIndex++)
 			{
-				tabRegion->donneesTab[i][j][cIndex] = UNCHECKED;
+				tabRegion->donneesTab[i][j][cIndex] = value;
 			}
 		}
 	}
@@ -375,3 +374,260 @@ IdRegion* whatIsNeighboorsColor(DonneesImageTab* tabRegion, int x, int y)
 	}
 	return idRegion;
 }
+
+//====================================================================================
+
+
+
+
+//====================================================================================
+
+//Fonction qui retourne une image de type DonneesImageRGB
+//Cette image représente les regions de l'image en type DonneesImageRGB passée en paramètre
+DonneesImageRGB* creerImageRegion(DonneesImageRGB *image, tableauRegion tableau)
+{			
+	//Déclaration des variables utiles aux traitements
+	int hauteur = image->hauteurImage;
+	int largeur = image->largeurImage;
+	germe *unGerme = NULL;
+	int hauteurGerme;
+	int largeurGerme;
+	int compteurRegion = 0;
+		
+	//Déclaration de notre image de traitement
+	DonneesImageTab *imageTraitement = RGBToTab(image);
+	
+	//Déclaration de notre image de retour
+	DonneesImageTab *retour = initTabRegion(largeur, hauteur, 255);
+	
+	//On cherche une germe et on la récupère
+	unGerme = chercheGermeImagePixel(retour, imageTraitement, 0, 0);
+		
+	//Tant qu'il y a une nouvelle germe
+	while(unGerme->set != false)
+	{		
+		//On colore la région
+		coloriseVoisinsRegionImagePixel(retour, imageTraitement, unGerme->hauteurGerme, unGerme->largeurGerme, unGerme->rouge, unGerme->vert, unGerme->bleu,
+										compteurRegion, tableau);
+		
+		//On cherche une nouvelle région
+		hauteurGerme = unGerme->hauteurGerme;
+		largeurGerme = unGerme->largeurGerme;		
+		free(unGerme);
+		unGerme = chercheGermeImagePixel(retour, imageTraitement, hauteurGerme, largeurGerme);
+		
+		compteurRegion++;
+	}
+	
+	//On interprete les régions sur l'image résultante
+	interpreteRegionImagePixel(retour);
+		
+	//Libération de mémoire
+	libereDonneesTab(&imageTraitement);
+		
+	//On retourne notre image avec les regions en type DonneesImageRGB
+	return(tabToRGB(retour));	
+}
+
+
+//Fonction qui cherche une germe dans une image en type imagePixel différente de la dernière germe
+germe* chercheGermeImagePixel(DonneesImageTab *imageRetour, DonneesImageTab *imageTraitement, int hauteur, int largeur)
+{
+	//Déclaration des variables utiles pour les boucles while
+	int i = 0;
+	int j = 0;
+	bool premiereLigne = true;
+	
+	//Déclaration de notre germe de retour
+	germe *retour = (germe*)malloc(sizeof(germe));
+	
+	i = hauteur;
+	//On cherche le premier point différent de blanc(255, 255, 255)
+	while(i < imageRetour->hauteurImage)
+	{
+		if(premiereLigne == true)
+		{
+			j = largeur;
+			premiereLigne = false;
+		}
+		else
+		{
+			j = 0;
+		}
+		while(j < imageRetour->largeurImage)
+		{
+			if( (imageRetour->donneesTab[i][j][RED] >= 0) && (imageRetour->donneesTab[i][j][GREEN] >= 0) && (imageRetour->donneesTab[i][j][BLUE] >= 0))
+			{				
+				//On initialise nos coordonnées du germe
+				retour->hauteurGerme = i;
+				retour->largeurGerme = j;
+				retour->set = true;
+				retour->rouge = imageTraitement->donneesTab[i][j][RED];
+				retour->vert = imageTraitement->donneesTab[i][j][GREEN];
+				retour->bleu = imageTraitement->donneesTab[i][j][BLUE];
+				
+				return(retour);
+			}
+			j++;
+		}
+		i++;
+	}
+	
+	//Si on n'a pas de nouvelle germe, on l'indique via "set"
+	if( (i >= imageRetour->hauteurImage) && (j >= imageRetour->largeurImage) )
+	{
+		retour->hauteurGerme = -1;
+		retour->largeurGerme = -1;
+		retour->set = false;
+		return(retour);
+	}
+	
+	return(NULL);
+}
+
+
+//Fonction qui colorise les voisins pour une région
+//Et l'image de retour et l'image de donnees
+void coloriseVoisinsRegionImagePixel(DonneesImageTab *retour, DonneesImageTab *image, int hauteurGerme, int largeurGerme, short int rouge, short int vert, short int bleu, 
+									int compteur, tableauRegion tableau)
+{
+	//Déclaration des variables pour les boucles for
+	int i = 0;
+	int j = 0;
+	
+	//Déclaration des variables utiles au traitement
+	int hauteurImage = retour->hauteurImage;
+	int largeurImage = retour->largeurImage;
+	float normeCouleurRegion = sqrt( pow(rouge, 2) + pow(vert, 2) + pow(bleu, 2) );
+	float normeCouleurImage;
+	
+	//Si on a les bonnes conditions
+	if( (hauteurGerme >= 0) && (hauteurGerme < hauteurImage) && (largeurGerme >= 0) && (largeurGerme < largeurImage) )
+	{
+		if ( (retour->donneesTab[hauteurGerme][largeurGerme][RED] != (-rouge)-1)
+			&& (retour->donneesTab[hauteurGerme][largeurGerme][GREEN] != (-vert)-1)
+			&& (retour->donneesTab[hauteurGerme][largeurGerme][BLUE] != (-bleu)-1) )
+		{
+			normeCouleurImage = sqrt( pow(image->donneesTab[hauteurGerme][largeurGerme][RED], 2) 
+										+ pow(image->donneesTab[hauteurGerme][largeurGerme][GREEN], 2) 
+										+ pow(image->donneesTab[hauteurGerme][largeurGerme][BLUE], 2) );
+			
+			//Si on est toujours dans la région
+			if( (normeCouleurImage < normeCouleurRegion + ACUITE)
+				&& (normeCouleurImage > normeCouleurRegion - ACUITE) )
+			{
+				
+				//Traitement
+				//On colore le germe
+				retour->donneesTab[hauteurGerme][largeurGerme][RED] = (-rouge)-1;
+				retour->donneesTab[hauteurGerme][largeurGerme][GREEN] = (-vert)-1;
+				retour->donneesTab[hauteurGerme][largeurGerme][BLUE] = (-bleu)-1;
+				
+				//On colore l'image de la region
+				tableau[compteur].donneesTab[hauteurGerme][largeurGerme][RED] = rouge;
+				tableau[compteur].donneesTab[hauteurGerme][largeurGerme][GREEN] = vert;
+				tableau[compteur].donneesTab[hauteurGerme][largeurGerme][BLUE] = bleu;
+				
+				//On colore les voisins
+				for(i = hauteurGerme-1; i <= hauteurGerme+1; i++)
+				{
+					for(j = largeurGerme-1; j <= largeurGerme+1; j++)
+					{
+						coloriseVoisinsRegionImagePixel(retour, image, i, j, rouge, vert, bleu, compteur, tableau);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		return;
+	}
+}
+
+//Fonction qui interprete les regions sur une image de type image Pixel
+//car durant le traitement les regions sont en valeurs négatives
+void interpreteRegionImagePixel(DonneesImageTab *retour)
+{
+	//Déclaration des variables pour les boucles for
+	int i;
+	int j;
+	
+	//Traitement
+	for(i = 0; i < retour->hauteurImage; i++)
+	{
+		for(j = 0; j < retour->largeurImage; j++)
+		{
+			retour->donneesTab[i][j][RED] = (-retour->donneesTab[i][j][RED])-1;
+			retour->donneesTab[i][j][GREEN] = (-retour->donneesTab[i][j][GREEN])-1;
+			retour->donneesTab[i][j][BLUE] = (-retour->donneesTab[i][j][BLUE])-1;
+		}
+	}	
+}
+
+//Fonction qui créer et initialise un tableauRegion
+void initTableauRegion(tableauRegion tableau, int hauteur, int largeur, int taille)
+{	
+	//Déclaration des variables utiles aux traitements
+	int i;
+
+	//On remplie notre tableau d'image blanche 400x400
+	for(i = 0; i < taille; i++)
+	{
+		tableau[i] = *initTabRegion(largeur, hauteur, 255);
+	}
+}
+
+//Fonction qui écrit dans le répertoire courant les images regions séparément
+//Renvoie le nombre de régions
+unsigned int ecrisRegions(tableauRegion regions, char *nom, int taille)
+{
+	int i;
+	char bufferNom[50];
+	char bufferNum[5];
+	unsigned int nbRegion = 0;
+	
+	for(i = 0; i < taille; i++)
+	{
+		if(evalueRegionsVide(regions, i) != true)
+		{
+			nbRegion++;
+			
+			sprintf(bufferNum, "%d", i);
+			strcpy(bufferNom, "regions/");
+			strcat(bufferNom, bufferNum);
+			strcat(bufferNom, nom);
+			ecrisBMPRGB_Dans(tabToRGB(&regions[i]), bufferNom);
+		}
+	}
+	
+	return(nbRegion);
+}
+
+//Fonction qui regarde dans le tableau de régions, si à l'index donné, l'image est vide (255,255,255)
+bool evalueRegionsVide(tableauRegion regions, int index)
+{
+	int i;
+	int j;
+	int compteur = 0;
+	
+	for(i = 0; i < regions[index].hauteurImage; i++)
+	{
+		for(j = 0; j < regions[index].largeurImage; j++)
+		{
+			if(regions[index].donneesTab[i][j][RED] == 255)
+			{
+				compteur++;
+			}
+		}
+	}
+	
+	if(compteur == (regions[index].hauteurImage * regions[index].largeurImage) )
+	{
+		return(true);
+	}
+	else
+	{
+		return(false);
+	}
+}	

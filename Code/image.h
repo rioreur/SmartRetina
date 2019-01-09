@@ -47,7 +47,7 @@ typedef struct
 {
 	int largeurImage;
 	int hauteurImage;
-	int ***donneesTab; /* Donnees sauvees dans l'ordre bleu-vert-rouge */
+	short int ***donneesTab; /* Donnees sauvees dans l'ordre bleu-vert-rouge */
 } DonneesImageTab;
 
 // Used to store an image in a 3D matrice.

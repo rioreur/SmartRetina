@@ -140,9 +140,9 @@ DonneesImageTab* createGlobalShape(DonneesImageTab* tabShape, DonneesImageTab* t
 	int startX = -1;
 	int startY = -1;
 	// This DonneesImageTab is used to create and store the border of the given shape
-	DonneesImageTab* tabBorder = initTabRegion(tabShape->largeurImage, tabShape->hauteurImage);
+	DonneesImageTab* tabBorder = initTabRegion(tabShape->largeurImage, tabShape->hauteurImage, UNCHECKED);
 	// This DonneesImageTab is used to create and store the gobalShape
-	DonneesImageTab* tabGlobalShape = initTabRegion(tabShape->largeurImage*2, tabShape->hauteurImage*2);
+	DonneesImageTab* tabGlobalShape = initTabRegion(tabShape->largeurImage*2, tabShape->hauteurImage*2, UNCHECKED);
 	
 	// We search for a starting point
 	// For each pixel in the tabShape
