@@ -63,7 +63,7 @@ typedef struct germe{
 #define MAX_REGIONS (10)
 
 //Définition de l'acuité pour la segmentation de regions
-#define ACUITE (10)
+#define ACUITE (50)
 
 //Déclaration du type tableau de regions
 typedef DonneesImageTab tableauRegion[MAX_REGIONS];

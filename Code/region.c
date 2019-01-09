@@ -405,7 +405,8 @@ DonneesImageRGB* creerImageRegion(DonneesImageRGB *image, tableauRegion tableau)
 		
 	//Tant qu'il y a une nouvelle germe
 	while(unGerme->set != false)
-	{		
+	{
+		printf("NEW germe : %d, %d \n", unGerme->largeurGerme, unGerme->hauteurGerme);
 		//On colore la région
 		coloriseVoisinsRegionImagePixel(retour, imageTraitement, unGerme->hauteurGerme, unGerme->largeurGerme, unGerme->rouge, unGerme->vert, unGerme->bleu,
 										compteurRegion, tableau);
@@ -434,47 +435,49 @@ DonneesImageRGB* creerImageRegion(DonneesImageRGB *image, tableauRegion tableau)
 germe* chercheGermeImagePixel(DonneesImageTab *imageRetour, DonneesImageTab *imageTraitement, int hauteur, int largeur)
 {
 	//Déclaration des variables utiles pour les boucles while
-	int i = 0;
-	int j = 0;
+	int x = 0;
+	int y = 0;
 	bool premiereLigne = true;
 	
 	//Déclaration de notre germe de retour
 	germe *retour = (germe*)malloc(sizeof(germe));
 	
-	i = hauteur;
+	y = hauteur;
 	//On cherche le premier point différent de blanc(255, 255, 255)
-	while(i < imageRetour->hauteurImage)
+	while(y < imageRetour->hauteurImage)
 	{
 		if(premiereLigne == true)
 		{
-			j = largeur;
+			x = largeur;
 			premiereLigne = false;
 		}
 		else
 		{
-			j = 0;
+			x = 0;
 		}
-		while(j < imageRetour->largeurImage)
+		while(x < imageRetour->largeurImage)
 		{
-			if( (imageRetour->donneesTab[i][j][RED] >= 0) && (imageRetour->donneesTab[i][j][GREEN] >= 0) && (imageRetour->donneesTab[i][j][BLUE] >= 0))
+			if( (imageRetour->donneesTab[x][y][RED] >= 0) && 
+				(imageRetour->donneesTab[x][y][GREEN] >= 0) && 
+				(imageRetour->donneesTab[x][y][BLUE] >= 0))
 			{				
 				//On initialise nos coordonnées du germe
-				retour->hauteurGerme = i;
-				retour->largeurGerme = j;
+				retour->hauteurGerme = y;
+				retour->largeurGerme = x;
 				retour->set = true;
-				retour->rouge = imageTraitement->donneesTab[i][j][RED];
-				retour->vert = imageTraitement->donneesTab[i][j][GREEN];
-				retour->bleu = imageTraitement->donneesTab[i][j][BLUE];
+				retour->rouge = imageTraitement->donneesTab[x][y][RED];
+				retour->vert = imageTraitement->donneesTab[x][y][GREEN];
+				retour->bleu = imageTraitement->donneesTab[x][y][BLUE];
 				
 				return(retour);
 			}
-			j++;
+			x++;
 		}
-		i++;
+		y++;
 	}
 	
 	//Si on n'a pas de nouvelle germe, on l'indique via "set"
-	if( (i >= imageRetour->hauteurImage) && (j >= imageRetour->largeurImage) )
+	if( (y >= imageRetour->hauteurImage) && (x >= imageRetour->largeurImage) )
 	{
 		retour->hauteurGerme = -1;
 		retour->largeurGerme = -1;
@@ -504,13 +507,13 @@ void coloriseVoisinsRegionImagePixel(DonneesImageTab *retour, DonneesImageTab *i
 	//Si on a les bonnes conditions
 	if( (hauteurGerme >= 0) && (hauteurGerme < hauteurImage) && (largeurGerme >= 0) && (largeurGerme < largeurImage) )
 	{
-		if ( (retour->donneesTab[hauteurGerme][largeurGerme][RED] != (-rouge)-1)
-			&& (retour->donneesTab[hauteurGerme][largeurGerme][GREEN] != (-vert)-1)
-			&& (retour->donneesTab[hauteurGerme][largeurGerme][BLUE] != (-bleu)-1) )
+		if ( (retour->donneesTab[largeurGerme][hauteurGerme][RED] != (-rouge)-1)
+			&& (retour->donneesTab[largeurGerme][hauteurGerme][GREEN] != (-vert)-1)
+			&& (retour->donneesTab[largeurGerme][hauteurGerme][BLUE] != (-bleu)-1) )
 		{
-			normeCouleurImage = sqrt( pow(image->donneesTab[hauteurGerme][largeurGerme][RED], 2) 
-										+ pow(image->donneesTab[hauteurGerme][largeurGerme][GREEN], 2) 
-										+ pow(image->donneesTab[hauteurGerme][largeurGerme][BLUE], 2) );
+			normeCouleurImage = sqrt( pow(image->donneesTab[largeurGerme][hauteurGerme][RED], 2) 
+										+ pow(image->donneesTab[largeurGerme][hauteurGerme][GREEN], 2) 
+										+ pow(image->donneesTab[largeurGerme][hauteurGerme][BLUE], 2) );
 			
 			//Si on est toujours dans la région
 			if( (normeCouleurImage < normeCouleurRegion + ACUITE)
@@ -519,14 +522,14 @@ void coloriseVoisinsRegionImagePixel(DonneesImageTab *retour, DonneesImageTab *i
 				
 				//Traitement
 				//On colore le germe
-				retour->donneesTab[hauteurGerme][largeurGerme][RED] = (-rouge)-1;
-				retour->donneesTab[hauteurGerme][largeurGerme][GREEN] = (-vert)-1;
-				retour->donneesTab[hauteurGerme][largeurGerme][BLUE] = (-bleu)-1;
+				retour->donneesTab[largeurGerme][hauteurGerme][RED] = (-rouge)-1;
+				retour->donneesTab[largeurGerme][hauteurGerme][GREEN] = (-vert)-1;
+				retour->donneesTab[largeurGerme][hauteurGerme][BLUE] = (-bleu)-1;
 				
 				//On colore l'image de la region
-				tableau[compteur].donneesTab[hauteurGerme][largeurGerme][RED] = rouge;
-				tableau[compteur].donneesTab[hauteurGerme][largeurGerme][GREEN] = vert;
-				tableau[compteur].donneesTab[hauteurGerme][largeurGerme][BLUE] = bleu;
+				tableau[compteur].donneesTab[largeurGerme][hauteurGerme][RED] = rouge;
+				tableau[compteur].donneesTab[largeurGerme][hauteurGerme][GREEN] = vert;
+				tableau[compteur].donneesTab[largeurGerme][hauteurGerme][BLUE] = bleu;
 				
 				//On colore les voisins
 				for(i = hauteurGerme-1; i <= hauteurGerme+1; i++)
@@ -558,9 +561,9 @@ void interpreteRegionImagePixel(DonneesImageTab *retour)
 	{
 		for(j = 0; j < retour->largeurImage; j++)
 		{
-			retour->donneesTab[i][j][RED] = (-retour->donneesTab[i][j][RED])-1;
-			retour->donneesTab[i][j][GREEN] = (-retour->donneesTab[i][j][GREEN])-1;
-			retour->donneesTab[i][j][BLUE] = (-retour->donneesTab[i][j][BLUE])-1;
+			retour->donneesTab[j][i][RED] = (-retour->donneesTab[j][i][RED])-1;
+			retour->donneesTab[j][i][GREEN] = (-retour->donneesTab[j][i][GREEN])-1;
+			retour->donneesTab[j][i][BLUE] = (-retour->donneesTab[j][i][BLUE])-1;
 		}
 	}	
 }
@@ -615,7 +618,7 @@ bool evalueRegionsVide(tableauRegion regions, int index)
 	{
 		for(j = 0; j < regions[index].largeurImage; j++)
 		{
-			if(regions[index].donneesTab[i][j][RED] == 255)
+			if(regions[index].donneesTab[j][i][RED] == 255 && regions[index].donneesTab[j][i][GREEN] == 255 && regions[index].donneesTab[j][i][BLUE] == 255 )
 			{
 				compteur++;
 			}
