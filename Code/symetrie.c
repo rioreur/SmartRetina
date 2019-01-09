@@ -331,14 +331,19 @@ int getArea(DonneesImageTab* tabShape)
 
 DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int step)
 {
+    // Use in the for loop
 	int x1, y1, x2, y2, cIndex;
+	// Use to identify a line. "r" is the distance from the line to the origin in pixels and "a" his angle in degree
 	int r, a;
 	// use for the equation of the axis (y = ax+p)
 	float m;
 	float p;
 	// We calculate the maximum r value possible (distance to the origine)
 	float maxR = sqrt(pow(tabImage->largeurImage, 2) + pow(tabImage->hauteurImage, 2));
+	// Use to calculate "a", temporary variable
 	float angle;
+	// Coordinate on the axis wich will be calculated each time
+	float x, y;
 	// We init the tab that will contain the Hough transform. We use maxR*2 to save the negative values
 	DonneesImageTab* tabAxis = initTab(720, maxR*2);
 	
@@ -347,32 +352,36 @@ DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int s
 	{
 		for(y1 = 0; y1 < tabImage->hauteurImage; y1+=step)
 		{
-		    printf("%d, %d\n", x1, y1);
 			// And for each color
 			for (cIndex = 0; cIndex < 3; cIndex++)
 			{
 				// If the pixel is concidered usefull (superior to the given sensibility)
 				if (tabImage->donneesTab[x1][y1][cIndex] > sensibility)
 				{
-					// For each pixel on our image
+					// And for each second pixel on our image
 	                for(x2 = 0; x2 < tabImage->largeurImage; x2+=step)
 	                {
 		                for(y2 = 0; y2 < tabImage->hauteurImage; y2+=step)
 		                {
+		                    // We check for future division by 0
 		                    if (x1 != x2 && y1 != y2)
 		                    {
-		                        m = ((float) (x2 - x1)) / ((float) (y2 - y1));
-		                        //p = ((float)(y1+y2))/((float) m*(x1+x2));
-		                        p = ((float) (y1 + y2))*((float) (x2 - x1)) /
-		                            (((float) (x1 + x2))*((float) (y2 - y1)));
-		                        r = (int) ((-p)/sqrt(1 + pow(m, 2))) + maxR;
-		                        printf("p : %f, m : %f, r : %d\n", p, m, r);
-		                        angle = atan((y2 - y1)/(x2 - x1));
+		                        // We find a point (x, y) wich is on the perpendicular bisector (our symmetrical axis)
+		                        x = ((float) (x1 + x2))/2;
+		                        y = ((float) (y1 + y2))/2;
+		                        // We find the y = mx + p equation of this line
+		                        m = ((float) (x1 - x2)) / ((float) (y2 - y1));
+		                        p = x / (m * y);
+		                        // We calculate the distance from the line to the center
+		                        r = (int) (absValue(p)/sqrt(1 + pow(m, 2))) + maxR; //probably a problem here
+		                        // Then we calculate the angle to the center
+		                        angle = atan2(y2 - y1, x2 - x1);
 		                        if (angle < 0)
 		                        {
 		                            angle += M_PI;
 		                        }
 		                        a = (int) nmap(angle, 0, M_PI, 0, 720);
+		                        //printf("(%d, %d) (%d, %d)\n p : %f, m : %f, r : %d & %f\n",x1, y1, x2, y2, p, m, r, maxR);
 		                        // We increase the corresponding value in our Hough table
 						        tabAxis->donneesTab[a][r][cIndex]++;
 						    }
@@ -382,5 +391,6 @@ DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int s
 			}
 		}
 	}
+	// We return the DonneesImageTab wich contain all the information on the most probable axis
 	return tabAxis;
 }

@@ -46,15 +46,11 @@ int main(int argc, char** argv)
 		
 		// Test of the function used to create a hough transform
 		printf("Creating the Hough transformation of the gradiant image\n");
-		DonneesImageTab* tabHough = createTabAxis(gradiantTabImage, 100, 1);
-		printf(" Creating the image of the hough transform\n");
-		DonneesImageRGB* houghImage = houghToRGB(tabHough);
-		ecrisBMPRGB_Dans(houghImage, "2 - hough.bmp");
-		/*DonneesImageTab* tabHough = createHough(gradiantTabImage, 200, 720);
+		DonneesImageTab* tabHough = createTabAxis(gradiantTabImage, 100, 5);
 		printf(" Edit it so it is easier to use\n");
         //  Making every point black or white
-		cutBetweenLevel(tabHough, 80, 255); // need to find what to put for the min (histogram ?)
-		cutBetweenLevel(tabHough, 0, 80);
+		/*cutBetweenLevel(tabHough, 80, 255); // need to find what to put for the min (histogram ?)
+		cutBetweenLevel(tabHough, 0, 80);*/
 		//  Making sure to have a blob around each point to find the regions easily
 		applyDillatationFilter(tabHough, 200);
 		printf(" Creating the image of the hough transform\n");
@@ -62,32 +58,26 @@ int main(int argc, char** argv)
 		ecrisBMPRGB_Dans(houghImage, "2 - hough.bmp");
 		
 		// Test of the function used to find region by flooding the image
-		printf("Creating a region for each lines on the hough transform \n");
+		/*printf("Creating a region for each lines on the hough transform \n");
 		DonneesImageTab* tabRegion = initTabRegion(tabHough->largeurImage, tabHough->hauteurImage);
 		IdRegions* idRegions = findAllRegionBottomUp(tabHough, tabRegion, 200);
-		//IdRegions* idRegions = findRegionFlow(tabHough, tabRegion, 240); // need to find the sensibility
 		printf(" Regions found : %d\n", idRegions->size);
 		DonneesImageRGB* regionImage = tabToRGB(tabRegion);
 		printf(" Creating the image of the hough regions\n");
-		ecrisBMPRGB_Dans(regionImage, "3 - region.bmp");
+		ecrisBMPRGB_Dans(regionImage, "3 - region.bmp");*/
 		
 		printf("Finding the lines on each regions\n");
 		// Test of the functions used to get the line in the hough transform
 		DonneesImageTab* newTabImage = cpyTab(tabImage);
-		int i;
-		for(i = 1; i < idRegions->size; i++) // the first one is the background so we skip it
-		{
-		    printf(" Finding line %d...\n", i);
-		    Line* line = getCenterLineFromRegion(tabHough, tabRegion, idRegions->regions[i]);
-		    updateLineInfo(gradiantTabImage, line, 200);
-		    traceLineOnImage(newTabImage, line, 255, 0, 0);
-		    free(line);
-		    line = NULL;
-		}
-		printf(" Done.\n");
+	    printf(" Finding line\n");
+	    Line* line = getMaxLine(tabHough);
+	    updateLineInfo(gradiantTabImage, line, 200);
+	    traceLineOnImage(newTabImage, line, 255, 0, 0);
+	    printf(" %d, %f\n", line->rIndex, (float)line->angularIndex/line->maxAngularIndex * 360);
+	        free(line);
 		printf(" Creating the image to show the found lines in red\n");
 		DonneesImageRGB* newImage = tabToRGB(newTabImage);
-		ecrisBMPRGB_Dans(newImage, "4 - newImage.bmp");*/
+		ecrisBMPRGB_Dans(newImage, "4 - newImage.bmp");
 
 		// Free of all the tests
 		printf("Freeing the memory\n");
@@ -104,10 +94,10 @@ int main(int argc, char** argv)
 		
 		/*libereDonneesTab(&tabRegion);
 		libereDonneesImageRGB(&regionImage);
-		destructIdRegions(&idRegions);
+		destructIdRegions(&idRegions);*/
 		
 		libereDonneesTab(&newTabImage);
-		libereDonneesImageRGB(&newImage);*/
+		libereDonneesImageRGB(&newImage);
 	}
 	else
 	{
