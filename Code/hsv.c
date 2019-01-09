@@ -154,53 +154,96 @@ couleurRVB HSVtoRGB(float H, float S, float V)
 		
 	c = V * S ;
 	newH = H / 60 ; 
+	printf("newH = %f", newH);
+	printf("H = %f", H);
 	printf("c: %f\n", c);
-	x = c * ( 1- (abs( fmod(newH, 2) - 1  ) ) );
+	x = c * ( 1- (fabs( fmod(newH, 2) - 1  ) ) );
 	printf("x: %f\n", x); 
 	m = V - c ; 
 	printf("m: %f\n", m);
-	if(0 <= newH && newH < 60)
+	if(0 <= H && H < 60)
 	{
+		printf("if 1 \n");
 		newR = c; 
 		newV = x;
 		newB = 0;
 	}
-	else if(60 < newH && newH <= 120)
+	else if(60 <= H && H < 120)
 	{
+		printf("if 2 \n");
 		newR = x; 
 		newV = c;
 		newB = 0;
 	}
-	else if(120 < newH && newH <= 180)
+	else if(120 <= H && H < 180)
 	{
+		printf("if 3 \n");
 		newR = 0; 
 		newV = c;
 		newB = x;
 	}
-	else if(180 < newH && newH <= 240)
+	else if(180 <= H && H < 240)
 	{
+		printf("if 4 \n");
 		newR = 0; 
 		newV = x;
 		newB = c;
 		printf("coucou\n");
 		printf("r:%f, v:%f, b:%f\n", newR, newV, newB);
 	}
-	else if(240 < newH && newH <= 300)
+	else if(240 <= H && H < 300)
 	{
+		printf("if 5 \n");
 		newR = x; 
 		newV = 0;
 		newB = c;
 	}
-	else if(300 < newH && newH <= 360)
+	else if(300 <= H && H < 360)
 	{
+		printf("if 6 \n");
 		newR = c; 
 		newV = 0;
 		newB = x;
 	}
+	else
+	{
+		newR = 0; 
+		newV = 0;
+		newB = 0;
+	}
 	
-	R = (newR + m) * 255 ;
-	G = (newV + m) * 255 ; 
-	B = (newB + m) * 255 ; 	
+	R = (newR + m) ;
+	G = (newV + m) ; 
+	B = (newB + m) ; 	
+	
+	if(R > 255)
+	{
+		R=255;
+	}
+	if(V > 255)
+	{
+		V=255;
+	}
+	if(B > 255 )
+	{
+		B = 255 ; 
+	}
+	if(R < 0 )
+	{
+		R = 0 ;
+	}
+	if( G < 0 )
+	{
+		G = 0 ; 
+	}
+	if( B < 0 )
+	{
+		B = 0 ; 
+	}
+	
+	R = (R * 255)/100 ;
+	G = (G * 255)/100 ;
+	B = (B * 255)/100 ; 
 	
 	rvb.r = R; 
 	rvb.v = G;
@@ -208,7 +251,6 @@ couleurRVB HSVtoRGB(float H, float S, float V)
 	printf("r:%f, v:%f, b:%f\n", R, G, B);
 	return rvb;
 }
-
 
 void afficheValeurCouleurHSV(matImageHSV* matHSV, int x, int y)
 {
