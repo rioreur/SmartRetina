@@ -68,8 +68,8 @@ IdRegion* findRegionBottomUp(DonneesImageTab* tabImage, DonneesImageTab* tabRegi
 {
 	IdRegion* idRegion = NULL;
 	// If the seed is in the image
-	if (0 <= x && x <= tabImage->largeurImage && 
-		0 <= y && y <= tabImage->largeurImage)
+	if (0 <= x && x < tabRegion->largeurImage && 
+		0 <= y && y < tabRegion->hauteurImage)
 	{
 		// We save the red, blue and green value of the seed
 		idRegion = initIdRegion(
