@@ -161,6 +161,13 @@ DonneesImageTab* applyRetina(DonneesImageTab *image)
     //Convertis l'image RVB en HSV
     tabCouleurHSV* imageHSV = tabBgrToTabHsv(image);
 
+    //Matrice HSV temporaire
+    tabCouleurHSV* tmpTabHSV = (tabCouleurHSV*)malloc(sizeof(tabCouleurHSV)) ;
+    tmpTabHSV->largeur = imageHSV->largeur; 
+    tmpTabHSV->hauteur = imageHSV->hauteur; 
+    tmpTabHSV->tabHsv = alloueMatCouleurHsv(tmpTabHSV->largeur, tmpTabHSV->hauteur) ;
+
+
     //Parcours le tableau
     for(widthIndex = 0; widthIndex < image->largeurImage; widthIndex++)
     {
@@ -187,12 +194,70 @@ DonneesImageTab* applyRetina(DonneesImageTab *image)
                         conesActivationValues[coneIndex] = getConeActivationValue(imageHSV->tabHsv[currentWidth][currentHeight] ,currentCone);
                     }
                 }
-            }
-            
 
-            //Addition chelou (gradient ? médian ?)
+                //Addition chelou (médian)
+                tmpTabHSV->tabHsv[widthIndex][heightIndex] = medianHSV(conesActivationValues, 9, SORT_BY_HUE);
+            }
         }
     }
 
     return filteredImage;
 }
+
+
+
+/* @fonction
+ *      Calcule et renvoie la médiane d'un tableau
+ * 		1D de couleurHSV
+ * 
+ * @param
+ * 		couleurHSV *table :   Tableau dont on cherche la médiane
+ * 		int size  :   Taille de ce tableau
+ *      medianSortBy attribute  :   attribut H, S ou V à trier
+ * 
+ * @retour
+ *      couleurHSV  :   Médiane du tableau
+ * */
+couleurHSV medianHSV(couleurHSV *table, int size, medianSortBy attribute)
+{ 
+	int i, j;
+	
+	for(i = size - 1; i > 0 ; i--)
+	{
+		for(j = 0; j < i - 1; j++)
+		{
+            if(attribute == SORT_BY_VALUE)
+            {
+                if(table[j+1].v < table[j].v)
+                {
+                    couleurHSV tmp = table[j+1];
+                    table[j+1] = table[j];
+                    table[j] = tmp;
+                }
+            }
+            else if(attribute == SORT_BY_SATURATION)
+            {
+                if(table[j+1].s < table[j].s)
+                {
+                    couleurHSV tmp = table[j+1];
+                    table[j+1] = table[j];
+                    table[j] = tmp;
+                }
+            }
+            else
+            {
+                if(table[j+1].h < table[j].h)
+                {
+                    couleurHSV tmp = table[j+1];
+                    table[j+1] = table[j];
+                    table[j] = tmp;
+                }
+            }
+
+			
+		}	
+	}
+	
+	return table[size/2];
+}
+

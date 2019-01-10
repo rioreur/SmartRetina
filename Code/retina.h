@@ -1,10 +1,17 @@
 #include "hsv.h"
 #include <time.h>
+#include <stdbool.h>
 
 /* @type
  *      Type de cône
  */
 typedef enum {LONG, MEDIUM, SHORT}coneType;
+
+/* @type
+ *      Paramétrage du filtre médian
+ */
+typedef enum {SORT_BY_HUE, SORT_BY_SATURATION, SORT_BY_VALUE}medianSortBy;
+
 
 /* @definition
  *      Valeurs de R (255, 0, 0), G et B en HSV selon 
@@ -28,6 +35,8 @@ typedef enum {LONG, MEDIUM, SHORT}coneType;
 #define L_CONES_PERCENT 40
 #define M_CONES_PERCENT 40
 #define S_CONES_PERCENT 20
+
+
 
 /* @type
  *      Structure définissant un cone de la fovéa
@@ -124,3 +133,18 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone);
  *      DonneesImageTab* : pointeur vers la matrice crée
  */
 DonneesImageTab* applyRetina(DonneesImageTab *image);
+
+
+/* @fonction
+ *      Calcule et renvoie la médiane d'un tableau
+ * 		1D de couleurHSV
+ * 
+ * @param
+ * 		couleurHSV *table :   Tableau dont on cherche la médiane
+ * 		int size  :   Taille de ce tableau
+ *      medianSortBy attribute  :   attribut H, S ou V à trier
+ * 
+ * @retour
+ *      couleurHSV  :   Médiane du tableau
+ * */
+couleurHSV medianHSV(couleurHSV *table, int size, medianSortBy attribute);
