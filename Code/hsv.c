@@ -108,16 +108,16 @@ couleurHSV** alloueMatCouleurHsv(int hauteur, int largeur)
 tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr)
 {
 	couleurHSV hsv ;
-	tabCouleurHSV* tabStructHsv ;
-	int largeurImage = tabBgr->largeurImage ; 
-	int hauteurImage = tabBgr->hauteurImage ; 
-	tabStructHsv = 	(tabCouleurHSV*)malloc(sizeof(tabCouleurHSV)) ; 
-	tabStructHsv->tabHsv = alloueMatCouleurHsv(largeurImage, hauteurImage) ; 
+	tabCouleurHSV* tabStructHsv ; 
+	tabStructHsv = 	(tabCouleurHSV*)malloc(sizeof(tabCouleurHSV)) ;
+	tabStructHsv->largeur = tabBgr->largeurImage ; 
+	tabStructHsv->hauteur = tabBgr->hauteurImage ; 
+	tabStructHsv->tabHsv = alloueMatCouleurHsv(tabStructHsv->largeur, tabStructHsv->hauteur) ; 
 	int i1, i2 ; 
 	
-	for(i1=0 ; i1<largeurImage ; i1+=1)
+	for(i1=0 ; i1<tabStructHsv->largeur ; i1+=1)
 	{
-		for(i2=0 ; i2<hauteurImage ; i2+=1)
+		for(i2=0 ; i2<tabStructHsv->hauteur ; i2+=1)
 		{
 			hsv = RGBtoHSV( tabBgr->donneesTab[i1][i2][BLUE], tabBgr->donneesTab[i1][i2][GREEN], tabBgr->donneesTab[i1][i2][RED] ) ; 
 			tabStructHsv->tabHsv[i1][i2] = hsv ; 
