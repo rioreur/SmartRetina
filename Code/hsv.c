@@ -126,6 +126,28 @@ tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr)
 	return tabStructHsv ; 
 }
 
+//Take a HSV matrix and return a BGR matrix
+DonneesImageTab* tabHsvToTabBgr(tabCouleurHSV* tabStructHsv)
+{
+	couleurRVB rvb ;
+	DonneesImageTab* imageTab ;  
+	int i1, i2 ; 
+	int largeur = tabStructHsv->largeur ; 
+	int hauteur = tabStructHsv->hauteur ; 
+	imageTab = initTab(largeur, hauteur) ;
+	for(i1=0 ; i1<largeur ; i1+=1)
+	{
+		for(i2=0 ; i2<hauteur ; i2+=1)
+		{
+			rvb = HSVtoRGB(tabStructHsv->tabHsv[i1][i2].h, tabStructHsv->tabHsv[i1][i2].s, tabStructHsv->tabHsv[i1][i2].v) ; 
+			imageTab->donneesTab[i1][i2][BLUE] = rvb.b ; 
+			imageTab->donneesTab[i1][i2][GREEN] = rvb.v ; 
+			imageTab->donneesTab[i1][i2][RED] = rvb.r ; 
+		}
+	}
+	return imageTab ; 
+}
+
 couleurRVB HSVtoRGB(float H, float S, float V)
 {
 	float c, x, m;

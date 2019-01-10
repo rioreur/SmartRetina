@@ -86,6 +86,5 @@ void afficheValeurCouleurHSV(matImageHSV* matHSV, int x, int y);
 void testFonctionHSV(DonneesImageRGB *image);
 couleurRVB HSVtoRGB(float H, float S, float V);
 couleurHSV** alloueMatCouleurHsv(int hauteur, int largeur) ;
-
-
 tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr);
+DonneesImageTab* tabHsvToTabBgr(tabCouleurHSV* tabHsv);
