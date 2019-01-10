@@ -69,9 +69,21 @@ float getConeActivationValue(couleurHSV color, coneType currentCone)
     int pixelHue = color.h;
     int coneHue = currentCone;
 
-    int distanceHues = (coneHue - pixelHue + 360)%360;
 
-    return distanceHues * color.v * color.s;
+    int distanceOneWay = (coneHue - pixelHue + 360)%360;
+    int distanceAnotherWay = (pixelHue - coneHue + 360)%360;
+    int distanceHues;
+
+    if(distanceOneWay >= distanceAnotherWay)
+    {
+        distanceHues = distanceAnotherWay;
+    }
+    else
+    {
+        distanceHues = distanceOneWay;
+    }
+
+    return ((360 - distanceHues)/360) * color.v * color.s;
 }
 
 
@@ -106,8 +118,8 @@ DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
     {
         for(heightIndex = 0; heightIndex < image->hauteurImage; heightIndex++)
         {
-            float newPixelHue = 0;
-            float sumOfActivationValues = 0;
+            int newPixelHue = 0;
+            int sumOfActivationValues = 0;
             int range = sideSize / 2;
 
             //Parcours les 8 voisins et le point lui même
@@ -129,9 +141,9 @@ DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
                         float activationValue = getConeActivationValue(imageHSV->tabHsv[currentWidth][currentHeight], cone );
                         
                         //Calcul du numérateur de la moyenne
-                        newPixelHue += cone * activationValue; 
+                        newPixelHue += (imageHSV->tabHsv[widthIndex][heightIndex].h - cone) * activationValue; 
 
-                        //Calcul du dénominateur de la moyenne
+                        //Calcul du dénominateur de la moyenne1
                         sumOfActivationValues += activationValue;
                     }
                 }
@@ -141,7 +153,7 @@ DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
             if(sumOfActivationValues != 0)
                 newPixelHue = newPixelHue / sumOfActivationValues;
             
-            newPixelHue += imageHSV->tabHsv[widthIndex][heightIndex].h;
+            newPixelHue = (newPixelHue + (int)imageHSV->tabHsv[widthIndex][heightIndex].h + 360)%360;
 
             //Enregistre le nouveau pixel
             couleurHSV newPixel;

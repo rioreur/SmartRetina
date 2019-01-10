@@ -5,29 +5,7 @@
 /* @type
  *      Type de cône
  */
-typedef enum {LONG = 0, MEDIUM = 120, SHORT = 240}coneType;
-
-/* @type
- *      Paramétrage du filtre médian
- */
-typedef enum {SORT_BY_HUE, SORT_BY_SATURATION, SORT_BY_VALUE}medianSortBy;
-
-
-/* @definition
- *      Valeurs de R (255, 0, 0), G et B en HSV selon 
- *      la convention LMS des cônes
- */
-#define HSV_LONG 0      //R
-#define HSV_MEDIUM 120  //G
-#define HSV_SHORT 240   //B
-
-/* @definition
- *      Portée de l'intervalle d'une couleur
- *      Une valeur comprise entre HSV_LONG +- HSV_RANGE
- *      modulo 360 sera considérée comme rouge
- */
-#define HSV_RANGE 60
-
+typedef enum {LONG = 360, MEDIUM = 120, SHORT = 240}coneType;
 
 /* @definition
  *      Pourcentages de répartition des cônes dans la fovéa
@@ -101,3 +79,5 @@ float getConeActivationValue(couleurHSV color, coneType currentCone);
  *      DonneesImageTab* : pointeur vers la matrice crée
  */
 DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize);
+
+ 
