@@ -93,6 +93,15 @@ typedef struct {
 	int size;
 } Histogram;
 
+//Use to store a point
+typedef struct {
+	int x;
+	int y;
+	int label;
+	int coef;
+} Point;
+
+
 ///////////////////////////
 //--- Maths functions ---//
 ///////////////////////////
