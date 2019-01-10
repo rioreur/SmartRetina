@@ -119,7 +119,7 @@ tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr)
 	{
 		for(i2=0 ; i2<tabStructHsv->hauteur ; i2+=1)
 		{
-			hsv = RGBtoHSV( tabBgr->donneesTab[i1][i2][BLUE], tabBgr->donneesTab[i1][i2][GREEN], tabBgr->donneesTab[i1][i2][RED] ) ; 
+			hsv = RGBtoHSV(tabBgr->donneesTab[i1][i2][RED], tabBgr->donneesTab[i1][i2][GREEN], tabBgr->donneesTab[i1][i2][BLUE]) ;  
 			tabStructHsv->tabHsv[i1][i2] = hsv ; 
 		}
 	}
