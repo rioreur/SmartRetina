@@ -104,31 +104,31 @@ Cone getRandomCone(void)
 couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone)
 {
     // Noir pas défaut
-    couleurHSV *activationValue;
-    activationValue->h = -1;
-    activationValue->s = 0;
-    activationValue->v = 0;
+    couleurHSV activationValue;
+    activationValue.h = -1;
+    activationValue.s = 0;
+    activationValue.v = 0;
 
     if(color.v < currentCone.valueThreshold)
     {     
         // Si c'est un cône rouge, l'intervalle de Hue a un traitement spécial
         if(currentCone.type == LONG)
         {
-            if(color.h >= currentCone.minHue && color.h < 360
-                || color.h >= 0 && color.h <= currentCone.maxHue)
+            if( (color.h >= currentCone.minHue && color.h < 360)
+                || (color.h >= 0 && color.h <= currentCone.maxHue) ) 
             {
-                activationValue->h = color.h;
-                activationValue->s = color.s;
-                activationValue->v = color.v;
+                activationValue.h = color.h;
+                activationValue.s = color.s;
+                activationValue.v = color.v;
             }
         }
         else
         {
             if(color.h >= currentCone.minHue && color.h <= currentCone.maxHue)
             {
-                activationValue->h = color.h;
-                activationValue->s = color.s;
-                activationValue->v = color.v;
+                activationValue.h = color.h;
+                activationValue.s = color.s;
+                activationValue.v = color.v;
             }
         }
     }
