@@ -142,22 +142,23 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone)
  *      de l'image filtrée par la rétine
  * 
  * @param
- *      DonneesImageTab image   :   image à filtrer
+ *      DonneesImageTab image   :   pointeursur l'image à filtrer
  * 
  * @retour
  *      DonneesImageTab* : pointeur vers la matrice crée
  */
-DonneesImageTab* applyRetina(DonneesImageTab image)
+DonneesImageTab* applyRetina(DonneesImageTab *image)
 {
     //Crée l'image à retourner
-    DonneesImageTab *filteredImage = initTab(image.largeurImage, image.hauteurImage);
-
+    DonneesImageTab *filteredImage = initTab(image->largeurImage, image->hauteurImage);
     int widthIndex, heightIndex;
 
+    tabCouleurHSV* imageHSV = tabBgrToTabHsv(image);
+
     //Parcours le tableau
-    for(widthIndex = 0; widthIndex < image.largeurImage; widthIndex++)
+    for(widthIndex = 0; widthIndex < image->largeurImage; widthIndex++)
     {
-        for(heightIndex = 0; heightIndex < image.hauteurImage; heightIndex++)
+        for(heightIndex = 0; heightIndex < image->hauteurImage; heightIndex++)
         {
 
             //Pour chaque point, convertis son RVB en HSV

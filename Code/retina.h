@@ -118,9 +118,9 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone);
  *      de l'image filtrée par la rétine
  * 
  * @param
- *      DonneesImageTab image   :   image à filtrer
+ *      DonneesImageTab image   :   pointeur sur l'image à filtrer
  * 
  * @retour
  *      DonneesImageTab* : pointeur vers la matrice crée
  */
-DonneesImageTab* applyRetina(DonneesImageTab image);
+DonneesImageTab* applyRetina(DonneesImageTab *image);

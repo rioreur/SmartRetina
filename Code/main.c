@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 		
 		// Filter the image through retina
 		printf("Going through the retina\n");
-		DonneesImageTab* filteredImage = applyRetina(*tabImage);
+		DonneesImageTab* filteredImage = applyRetina(tabImage);
 
 		// Create the new image
 		DonneesImageRGB* newImage = tabToRGB(filteredImage);
