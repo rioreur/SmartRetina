@@ -151,8 +151,14 @@ DonneesImageTab* applyRetina(DonneesImageTab *image)
 {
     //Crée l'image à retourner
     DonneesImageTab *filteredImage = initTab(image->largeurImage, image->hauteurImage);
-    int widthIndex, heightIndex;
 
+    //Indexs de tableau
+    int widthIndex, heightIndex, neighbourWidth, neighbourHeight, coneIndex;
+
+    //Valeurs d'activations d'un groupe de 9 cônes
+    couleurHSV *conesActivationValues = (couleurHSV*)malloc(9 * sizeof(couleurHSV));
+
+    //Convertis l'image RVB en HSV
     tabCouleurHSV* imageHSV = tabBgrToTabHsv(image);
 
     //Parcours le tableau
@@ -160,10 +166,30 @@ DonneesImageTab* applyRetina(DonneesImageTab *image)
     {
         for(heightIndex = 0; heightIndex < image->hauteurImage; heightIndex++)
         {
+            //Parcours les 8 voisins et le point lui même
+            for(neighbourWidth = -1; neighbourWidth <= 1; neighbourWidth++)
+            {
+                coneIndex = 0;
 
-            //Pour chaque point, convertis son RVB en HSV
-            //Génère 9 photorécepteurs
-            //Applique les au voisinage
+                for(neighbourHeight = -1; neighbourHeight <= 1; neighbourHeight++)
+                {
+                    //Coordonnées du point courant
+                    int currentWidth = widthIndex + neighbourWidth;
+                    int currentHeight = heightIndex + neighbourHeight;
+
+                    //Génère un photorécepteur
+                    Cone currentCone = getRandomCone();
+
+                    if( (currentWidth >= 0) && (currentWidth < imageHSV->largeur) 
+                            && (currentHeight >= 0) && (currentHeight < imageHSV->hauteur) )
+                    {
+                        //Applique le photorécepteur au point et récupère sa valeur d'activation
+                        conesActivationValues[coneIndex] = getConeActivationValue(imageHSV->tabHsv[currentWidth][currentHeight] ,currentCone);
+                    }
+                }
+            }
+            
+
             //Addition chelou (gradient ? médian ?)
         }
     }
