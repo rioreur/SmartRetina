@@ -98,7 +98,7 @@ typedef struct {
 	int x;
 	int y;
 	int label;
-	int coef;
+	float coef;
 } Point;
 
 

@@ -469,30 +469,55 @@ void colorGravityPointRegions(DonneesImageTab* tabRegion, Point** tabPoints, int
 	
 	for(index = 0; index < size; index++)
 	{
-		if(tabPoints[index]->coef == -1)
+		if(tabPoints[index]->coef >= 0.90)
 		{
 			//Colorise the gravity center
-			tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][RED] = 255;
+			tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][BLUE] = 255 - 
+			    tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][BLUE];
+			tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][GREEN] = 255 - 
+			    tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][GREEN];
+			tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][RED] = 255 - 
+			    tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][RED];
 		}
 	}
 }
 
 void destructTabPoints(Point*** tabPoints, int size)
 {
-	int index;
-	
-	for(index = 0; index < size; index++)
+    if (tabPoints != NULL)
 	{
-		free((*tabPoints)[index]);
+		if (*tabPoints != NULL)
+		{
+	        int index;
+	        for(index = 0; index < size; index++)
+	        {
+		        free((*tabPoints)[index]);
+	        }
+	        free(*tabPoints);
+	        *tabPoints = NULL;
+		}
 	}
-	free((*tabPoints));
-	tabPoints = NULL;
 }
 
-
-
-
-
-
-
+DonneesImageTab* getColorTabRegions(DonneesImageTab* tabRegion, IdRegions* idRegions)
+{
+    DonneesImageTab* tabRegionColor = initTab(tabRegion->largeurImage, tabRegion->hauteurImage);
+    int i, j, indexRegion;
+    for(i = 0; i < tabRegion->largeurImage; i++)
+    {
+        for(j = 0; j < tabRegion->hauteurImage; j++)
+        {
+            for(indexRegion = 0; indexRegion < idRegions->size; indexRegion++)
+            {
+                if (tabRegion->donneesTab[i][j][BLUE] == idRegions->regions[indexRegion]->label)
+                {
+                    tabRegionColor->donneesTab[i][j][BLUE] = idRegions->regions[indexRegion]->blue;
+                    tabRegionColor->donneesTab[i][j][GREEN] = idRegions->regions[indexRegion]->green;
+                    tabRegionColor->donneesTab[i][j][RED] = idRegions->regions[indexRegion]->red;
+                }
+            }
+        }
+    }
+    return tabRegionColor;
+}
 
