@@ -627,15 +627,7 @@ DonneesImageRGB* houghToRGB(DonneesImageTab* tabHough)
 Line* getMaxLine(DonneesImageTab* tabHough)
 {
 	int i, j, cIndex;
-	Line* maxLine = malloc(sizeof(Line));
-	maxLine->maxRIndex = tabHough->hauteurImage;
-	maxLine->maxAngularIndex = tabHough->largeurImage;
-	maxLine->startX = -1;
-	maxLine->startY = -1;
-	maxLine->endX = -1;
-	maxLine->endY = -1;
-	maxLine->lenght = 0;
-	maxLine->lenghtRatio = 0;
+	Line* maxLine = initLine(tabHough->hauteurImage, tabHough->largeurImage);
 	int max = 0;
 	// For each pixel in the Hough matrice
 	for(i = 0; i < tabHough->largeurImage; i++)

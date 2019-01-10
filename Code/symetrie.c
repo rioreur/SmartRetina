@@ -329,56 +329,242 @@ int getArea(DonneesImageTab* tabShape)
 	return area;
 }
 
-DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility)
+DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int step)
 {
+    // Use in the for loop
 	int x1, y1, x2, y2, cIndex;
+	// Use to identify a line. "r" is the distance from the line to the origin in pixels and "a" his angle in degree
 	int r, a;
 	// use for the equation of the axis (y = ax+p)
 	float m;
 	float p;
 	// We calculate the maximum r value possible (distance to the origine)
 	float maxR = sqrt(pow(tabImage->largeurImage, 2) + pow(tabImage->hauteurImage, 2));
+	// Use to calculate "a", temporary variable
 	float angle;
+	// Coordinate on the axis wich will be calculated each time
+	float x, y;
 	// We init the tab that will contain the Hough transform. We use maxR*2 to save the negative values
 	DonneesImageTab* tabAxis = initTab(720, maxR*2);
 	
 	// For each pixel on our image
-	for(x1 = 0; x1 < tabImage->largeurImage; x1++)
+	for(x1 = 0; x1 < tabImage->largeurImage; x1+=step)
 	{
-		for(y1 = 0; y1 < tabImage->hauteurImage; y1++)
+		for(y1 = 0; y1 < tabImage->hauteurImage; y1+=step)
 		{
-		    //printf("%d, %d\n", x1, y1);
 			// And for each color
 			for (cIndex = 0; cIndex < 3; cIndex++)
 			{
 				// If the pixel is concidered usefull (superior to the given sensibility)
 				if (tabImage->donneesTab[x1][y1][cIndex] > sensibility)
 				{
-					// For each pixel on our image
-	                for(x2 = 0; x2 < tabImage->largeurImage; x2++)
+					// And for each second pixel on our image
+	                for(x2 = 0; x2 < tabImage->largeurImage; x2+=step)
 	                {
-		                for(y2 = 0; y2 < tabImage->hauteurImage; y2++)
+		                for(y2 = 0; y2 < tabImage->hauteurImage; y2+=step)
 		                {
-		                    if (x1 != x2 && y1 != y2)
+		                    // We check for future division by 0
+		                    if (y1 != y2 && x1 != x2)
 		                    {
-		                        m = ((float) (x2 - x1)) / ((float) (y2 - y1));
-		                        p = ((float) (y1 + y2))*((float) (x2 - x1)) /
-		                            (((float) (x1 + x2))*((float) (y2 - y1)));
-		                        r = (int) p/sqrt(1 + pow(m, 2)) + maxR;
-		                        angle = atan((y2 - y1)/(x2 - x1));
+		                        ////////////////////////////
+		                        //--- c'est dégeulasse ---//
+		                        ////////////////////////////
+		                        
+		                        // We find a point (x, y) wich is on the perpendicular bisector (our symmetrical axis)
+		                        x = ((float) (x1 + x2))/2;
+		                        y = ((float) (y1 + y2))/2;
+		                        // We find the y = mx + p equation of this line
+		                        m = ((float) (x1 - x2)) / ((float) (y2 - y1));
+		                        p = x / (m * y);
+		                        // We calculate the distance from the line to the center
+		                        r = (int) (p/sqrt(1 + pow(m, 2)));
+		                        if (r >= maxR)
+		                        {
+		                            r = maxR-1;
+		                        }
+		                        if (r <= -maxR)
+		                        {
+		                            r = -maxR+1;
+		                        }
+		                        // Then we calculate the angle to the center
+		                        angle = atan2(y2 - y1, x2 - x1);
 		                        if (angle < 0)
 		                        {
 		                            angle += M_PI;
 		                        }
 		                        a = (int) nmap(angle, 0, M_PI, 0, 720);
-		                        // We increase the corresponding value in our Hough table
-						        tabAxis->donneesTab[a][r][cIndex]++;
 						    }
+						    else if (y1 == y2)
+						    {
+		                        // We calculate the distance from the line to the center
+		                        r = ((float) (x1 + x2))/2;
+		                        // Then we calculate the angle to the center
+		                        a = 0;
+						    }
+						    else
+						    {
+						        // We calculate the distance from the line to the center
+						        r = ((float) (y1 + y2))/2;
+						        // Then we calculate the angle to the center
+						        a = 360; // this one is 90° because we have a maximum of 720 différent angle
+						    }
+						    //printf("%d, %d\n", a, r);
+						    // We increase the corresponding value in our Hough table
+						    tabAxis->donneesTab[a][(int) (r + maxR)][cIndex]++;
 		                }
 		            }
 				}
 			}
 		}
 	}
+	// We return the DonneesImageTab wich contain all the information on the most probable axis
 	return tabAxis;
+}
+
+bool isARegionBorder(DonneesImageTab* tabRegion, IdRegion* idRegion, int x, int y)
+{
+	bool areEmptyNeighbours = false;
+	// If the pixel to the right is empty
+	if (x + 1 >= tabRegion->largeurImage ||
+		(tabRegion->donneesTab[x + 1][y][BLUE] != idRegion->label &&
+		tabRegion->donneesTab[x + 1][y][GREEN] != idRegion->label &&
+		tabRegion->donneesTab[x + 1][y][RED] != idRegion->label))
+	{
+		// We say that their is neighbours
+		areEmptyNeighbours = true;
+	}
+	// If the pixel to the left is empty
+	if (0 > x - 1 ||
+		(tabRegion->donneesTab[x - 1][y][BLUE] != idRegion->label &&
+		tabRegion->donneesTab[x - 1][y][GREEN] != idRegion->label &&
+		tabRegion->donneesTab[x - 1][y][RED] != idRegion->label))
+	{
+		// We say that their is neighbours
+		areEmptyNeighbours = true;
+	}
+	// If the pixel to the bottom is empty
+	if (y + 1 >= tabRegion->hauteurImage ||
+		(tabRegion->donneesTab[x][y + 1][BLUE] != idRegion->label &&
+		tabRegion->donneesTab[x][y + 1][GREEN] != idRegion->label &&
+		tabRegion->donneesTab[x][y + 1][RED] != idRegion->label))
+	{
+		// We say that their is neighbours
+		areEmptyNeighbours = true;
+	}
+	// If the pixel to the top is empty
+	if (0 > y - 1 ||
+		(tabRegion->donneesTab[x][y - 1][BLUE] != idRegion->label &&
+		tabRegion->donneesTab[x][y - 1][GREEN] != idRegion->label &&
+		tabRegion->donneesTab[x][y - 1][RED] != idRegion->label))
+	{
+		// We say that their is neighbours
+		areEmptyNeighbours = true;
+	}
+	// If their is empty neighbours and if the pixel isn't empty
+	if (tabRegion->donneesTab[x][y][BLUE] == idRegion->label &&
+		tabRegion->donneesTab[x][y][GREEN] == idRegion->label &&
+		tabRegion->donneesTab[x][y][RED] == idRegion->label &&
+		areEmptyNeighbours)
+	{
+		// Then we are on a border
+		return true;
+	}
+	// Otherwise, we're not
+	return false;
+}
+
+DonneesImageTab* getShapeEdge(DonneesImageTab* tabRegion, IdRegion* idRegion)
+{
+	int i, j;
+	int startX = idRegion->x;
+	int startY = idRegion->y;
+	// This DonneesImageTab is used to create and store the border of the given shape
+	DonneesImageTab* tabBorder = initTabRegion(tabRegion->largeurImage, tabRegion->hauteurImage);
+	
+	// We search for a starting point
+	// For each pixel in the tabShape
+	for (i = 0; i < tabRegion->largeurImage; i++)
+	{
+		for (j = 0; j < tabRegion->hauteurImage; j++)
+		{
+			// If we find a pixel which is a border
+			if (isARegionBorder(tabRegion, idRegion, i, j))
+			{
+				// We save the point
+				startX = i;
+				startY = j;
+			}
+		}
+	}
+	// If we have found a starting point
+	if (startX >= 0 && startY >= 0)
+	{
+		// use to store the current pixel border. We make it start at the coordinate we previously found
+		int currentX = startX;
+		int currentY = startY;
+		// Use to store the next pixel border
+		int nextX;
+		int nextY;
+		// We start a loop
+		do
+		{
+			// We say that the next pixel in the border isn't define yet
+			nextX = -1;
+			nextY = -1;
+			// For each neighbours
+			for (i = -1; i <= 1; i++)
+			{
+				for (j = -1; j <= 1; j++)
+				{
+					// If it is in the tabShape
+					//and we still haven't found the next border pixel
+					//and the neighbours is an empty pixel
+					//and if it is a border pixel
+					if (0 <= currentX + i && currentX + i < tabRegion->largeurImage &&
+						0 <= currentY + j && currentY + j < tabRegion->hauteurImage &&
+						nextX == -1 &&
+						nextY == -1 &&
+						tabBorder->donneesTab[currentX + i][currentY + j][BLUE] == UNCHECKED &&
+						tabBorder->donneesTab[currentX + i][currentY + j][GREEN] == UNCHECKED &&
+						tabBorder->donneesTab[currentX + i][currentY + j][RED] == UNCHECKED &&
+						isARegionBorder(tabRegion, idRegion, currentX + i, currentY + j))
+					{
+						// We save the next border pixel
+						nextX = currentX + i;
+						nextY = currentY + j;
+					}
+				}
+			}
+			// We save the current pixel in the tabBorder
+			tabBorder->donneesTab[currentX][currentY][BLUE] = BORDER;
+			tabBorder->donneesTab[currentX][currentY][GREEN] = BORDER;
+			tabBorder->donneesTab[currentX][currentY][RED] = BORDER;
+			// Then we update the current pixel with the next coordonate we found
+			currentX = nextX;
+			currentY = nextY;
+		// We stop if we didn't found a new valid border or if we just get back to the starting point
+		} while(nextX != -1 && nextY != -1 && (nextX != startX || nextY != startY));
+	}
+	
+	// Then, for each pixels
+	for (i = 0; i < tabRegion->largeurImage; i++)
+	{
+		for (j = 0; j < tabRegion->hauteurImage; j++)
+		{
+			// If it is a border pixel
+			if (tabBorder->donneesTab[i][j][BLUE] == BORDER &&
+				tabBorder->donneesTab[i][j][GREEN] == BORDER &&
+				tabBorder->donneesTab[i][j][RED] == BORDER)
+			{
+				// We draw the shape at each pixel of the border
+				tabBorder->donneesTab[i][j][BLUE] = 255;
+				// We draw the shape at each pixel of the border
+				tabBorder->donneesTab[i][j][GREEN] = 255;
+				// We draw the shape at each pisxel of the border
+				tabBorder->donneesTab[i][j][RED] = 255;
+			}
+		}
+	}
+	// Then we return the global shape
+	return tabBorder;
 }
