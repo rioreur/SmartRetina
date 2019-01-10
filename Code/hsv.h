@@ -1,5 +1,5 @@
 // .h necessaires a l'application
-#include "image.h"
+#include "symetrie.h"
 
 #include <malloc.h>
 #include <math.h>
