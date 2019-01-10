@@ -156,32 +156,43 @@ couleurRVB HSVtoRGB(float H, float S, float V)
 	couleurRVB rvb ; 
 		
 	c = V * S ;
-	newH = H / 60 ;
+	newH = H / 60 ; 
+	//printf("newH = %f", newH);
+	//printf("H = %f", H);
+	//printf("c: %f\n", c);
 	x = c * ( 1- (fabs( fmod(newH, 2) - 1  ) ) );
+	//printf("x: %f\n", x); 
 	m = V - c ; 
+	//printf("m: %f\n", m);
 	if(0 <= H && H < 60)
 	{
+		//printf("if 1 \n");
 		newR = c; 
 		newV = x;
 		newB = 0;
 	}
 	else if(60 <= H && H < 120)
 	{
+		//printf("if 2 \n");
 		newR = x; 
 		newV = c;
 		newB = 0;
 	}
 	else if(120 <= H && H < 180)
 	{
+		//printf("if 3 \n");
 		newR = 0; 
 		newV = c;
 		newB = x;
 	}
 	else if(180 <= H && H < 240)
 	{
+		//printf("if 4 \n");
 		newR = 0; 
 		newV = x;
 		newB = c;
+		//printf("coucou\n");
+		//printf("r:%f, v:%f, b:%f\n", newR, newV, newB);
 	}
 	else if(240 <= H && H < 300)
 	{
@@ -206,38 +217,17 @@ couleurRVB HSVtoRGB(float H, float S, float V)
 	G = (newV + m) ; 
 	B = (newB + m) ; 	
 	
-	if(R > 255)
-	{
-		R=255;
-	}
-	if(V > 255)
-	{
-		V=255;
-	}
-	if(B > 255 )
-	{
-		B = 255 ; 
-	}
-	if(R < 0 )
-	{
-		R = 0 ;
-	}
-	if( G < 0 )
-	{
-		G = 0 ; 
-	}
-	if( B < 0 )
-	{
-		B = 0 ; 
-	}
-	
-	R = (R * 255)/100 ;
-	G = (G * 255)/100 ;
-	B = (B * 255)/100 ; 
+	R = (R * 255) ;
+	G = (G * 255) ;
+	B = (B * 255) ; 
 	
 	rvb.r = R; 
 	rvb.v = G;
 	rvb.b = B;
+<<<<<<< HEAD
+=======
+	//printf("r:%f, v:%f, b:%f\n", R, G, B);
+>>>>>>> fovea-process
 	return rvb;
 }
 
