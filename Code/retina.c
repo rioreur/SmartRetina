@@ -83,7 +83,7 @@ Cone getRandomCone(void)
         newCone.maxHue = HSV_SHORT + HSV_RANGE - 1;
     }
 
-    newCone.valueThreshold = 10;
+    newCone.valueThreshold = 0;
 
     return newCone;
 }
@@ -105,11 +105,11 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone)
 {
     // Noir pas défaut
     couleurHSV activationValue;
-    activationValue.h = -1;
+    activationValue.h = 0;
     activationValue.s = 0;
     activationValue.v = 0;
 
-    if(color.v < currentCone.valueThreshold)
+    if(color.v > currentCone.valueThreshold)
     {     
         // Si c'est un cône rouge, l'intervalle de Hue a un traitement spécial
         if(currentCone.type == LONG)
@@ -149,9 +149,6 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone)
  */
 DonneesImageTab* applyRetina(DonneesImageTab *image)
 {
-    //Crée l'image à retourner
-    DonneesImageTab *filteredImage = initTab(image->largeurImage, image->hauteurImage);
-
     //Indexs de tableau
     int widthIndex, heightIndex, neighbourWidth, neighbourHeight, coneIndex;
 
@@ -173,35 +170,34 @@ DonneesImageTab* applyRetina(DonneesImageTab *image)
     {
         for(heightIndex = 0; heightIndex < image->hauteurImage; heightIndex++)
         {
+            coneIndex = 0;
+
             //Parcours les 8 voisins et le point lui même
             for(neighbourWidth = -1; neighbourWidth <= 1; neighbourWidth++)
             {
-                coneIndex = 0;
-
                 for(neighbourHeight = -1; neighbourHeight <= 1; neighbourHeight++)
                 {
                     //Coordonnées du point courant
                     int currentWidth = widthIndex + neighbourWidth;
                     int currentHeight = heightIndex + neighbourHeight;
 
-                    //Génère un photorécepteur
-                    Cone currentCone = getRandomCone();
-
                     if( (currentWidth >= 0) && (currentWidth < imageHSV->largeur) 
                             && (currentHeight >= 0) && (currentHeight < imageHSV->hauteur) )
                     {
                         //Applique le photorécepteur au point et récupère sa valeur d'activation
-                        conesActivationValues[coneIndex] = getConeActivationValue(imageHSV->tabHsv[currentWidth][currentHeight] ,currentCone);
+                        conesActivationValues[coneIndex] = getConeActivationValue(imageHSV->tabHsv[currentWidth][currentHeight], getRandomCone() );
+                        coneIndex += 1;
                     }
                 }
-
-                //Addition chelou (médian)
-                tmpTabHSV->tabHsv[widthIndex][heightIndex] = medianHSV(conesActivationValues, 9, SORT_BY_HUE);
             }
+
+            //Addition chelou (médian)
+            tmpTabHSV->tabHsv[widthIndex][heightIndex] = medianHSV(conesActivationValues, coneIndex, SORT_BY_HUE);
         }
     }
 
-    return filteredImage;
+    return tabHsvToTabBgr(tmpTabHSV);
+//    return tabHsvToTabBgr(imageHSV);
 }
 
 
