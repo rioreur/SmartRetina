@@ -11,10 +11,15 @@
 #include <stdbool.h>
 
 //Header file
-#include "symetrie.h"
+#include "retina.h"
 
 int main(int argc, char** argv)
 {
+	//Initialize random with a seed
+	printf("Initializing random with a seed\n");
+	srand(10495854);
+	
+
 	// We get the image we will use for the test
 	printf("Reading the image\n");
 	DonneesImageRGB* image = NULL;
