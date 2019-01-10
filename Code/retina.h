@@ -5,7 +5,7 @@
 /* @type
  *      Type de cône
  */
-typedef enum {LONG, MEDIUM, SHORT}coneType;
+typedef enum {LONG = 0, MEDIUM = 120, SHORT = 240}coneType;
 
 /* @type
  *      Paramétrage du filtre médian
@@ -35,26 +35,6 @@ typedef enum {SORT_BY_HUE, SORT_BY_SATURATION, SORT_BY_VALUE}medianSortBy;
 #define L_CONES_PERCENT 40
 #define M_CONES_PERCENT 40
 #define S_CONES_PERCENT 20
-
-
-
-/* @type
- *      Structure définissant un cone de la fovéa
- * 
- * @param
- *      coneType type       : type du cône (LMS)
- *      int minHue          : valeur en degré de la borne inférieure 
- *                              de l'intervalle de couleur qui active le cône
- *      int maxHue          : valeur de la borne supérieure
- *      int valueThreshold  : seuil de la Valeur pour activer le cône
- */
-typedef struct Cone
-{
-    coneType type;
-    int minHue;
-    int maxHue;
-    int valueThreshold;
-}Cone;
 
 
 /* @fonction		:	Renvoie une valeur aléatoire comprise entre deux valeurs
@@ -95,19 +75,6 @@ coneType getRandomConeType(void);
 
 
 /* @fonction
- *      Renvoie une structure Cone aléatoire
- *      en respectant la répartition LMS dans une fovéa
- * 
- * @param
- *      \
- * 
- * @retour
- *      Cone : structure Cone
- */
-Cone getRandomCone(void);
-
-
-/* @fonction
  *      Renvoie la valeur d'activation d'un cône
  *      en prenant en compte la couleur HSV à
  *      laquelle il est exposé
@@ -117,9 +84,9 @@ Cone getRandomCone(void);
  *      Cone currentCone : cone à tester
  * 
  * @retour
- *      couleurHSV : valeur d'activation du cône
+ *      float : valeur d'activation du cône
  */
-couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone);
+float getConeActivationValue(couleurHSV color, coneType currentCone);
 
 
 /* @fonction
@@ -134,18 +101,3 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone);
  *      DonneesImageTab* : pointeur vers la matrice crée
  */
 DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize);
-
-
-/* @fonction
- *      Calcule et renvoie la médiane d'un tableau
- * 		1D de couleurHSV
- * 
- * @param
- * 		couleurHSV *table :   Tableau dont on cherche la médiane
- * 		int size  :   Taille de ce tableau
- *      medianSortBy attribute  :   attribut H, S ou V à trier
- * 
- * @retour
- *      couleurHSV  :   Médiane du tableau
- * */
-couleurHSV medianHSV(couleurHSV *table, int size, medianSortBy attribute);

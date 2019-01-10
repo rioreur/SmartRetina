@@ -53,43 +53,6 @@ coneType getRandomConeType(void)
 
 
 /* @fonction
- *      Renvoie une structure Cone aléatoire
- *      en respectant la répartition LMS dans une fovéa
- * 
- * @param
- *      \
- * 
- * @retour
- *      Cone : structure Cone
- */
-Cone getRandomCone(void)
-{
-    Cone newCone;
-    newCone.type = getRandomConeType();
-    
-    if(newCone.type == LONG)
-    {
-        newCone.minHue = 360 - HSV_RANGE;
-        newCone.maxHue = HSV_LONG + HSV_RANGE - 1;
-    }
-    else if(newCone.type == MEDIUM)
-    {
-        newCone.minHue = HSV_MEDIUM - HSV_RANGE;
-        newCone.maxHue = HSV_MEDIUM + HSV_RANGE - 1;
-    }
-    else if(newCone.type == SHORT)
-    {
-        newCone.minHue = HSV_SHORT - HSV_RANGE;
-        newCone.maxHue = HSV_SHORT + HSV_RANGE - 1;
-    }
-
-    newCone.valueThreshold = 0;
-
-    return newCone;
-}
-
-
-/* @fonction
  *      Renvoie la valeur d'activation d'un cône
  *      en prenant en compte la couleur HSV à
  *      laquelle il est exposé
@@ -99,41 +62,16 @@ Cone getRandomCone(void)
  *      Cone currentCone : cone à tester
  * 
  * @retour
- *      couleurHSV : valeur d'activation du cône
+ *      float : valeur d'activation du cône
  */
-couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone)
+float getConeActivationValue(couleurHSV color, coneType currentCone)
 {
-    // Noir pas défaut
-    couleurHSV activationValue;
-    activationValue.h = 0;
-    activationValue.s = 0;
-    activationValue.v = 0;
+    int pixelHue = color.h;
+    int coneHue = currentCone;
 
-    if(color.v > currentCone.valueThreshold)
-    {     
-        // Si c'est un cône rouge, l'intervalle de Hue a un traitement spécial
-        if(currentCone.type == LONG)
-        {
-            if( (color.h >= currentCone.minHue && color.h < 360)
-                || (color.h >= 0 && color.h <= currentCone.maxHue) ) 
-            {
-                activationValue.h = color.h;
-                activationValue.s = color.s;
-                activationValue.v = color.v;
-            }
-        }
-        else
-        {
-            if(color.h >= currentCone.minHue && color.h <= currentCone.maxHue)
-            {
-                activationValue.h = color.h;
-                activationValue.s = color.s;
-                activationValue.v = color.v;
-            }
-        }
-    }
+    int distanceHues = (coneHue - pixelHue + 360)%360;
 
-    return activationValue;
+    return distanceHues * color.v * color.s;
 }
 
 
@@ -151,10 +89,7 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone)
 DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
 {
     //Indexs de tableau
-    int widthIndex, heightIndex, neighbourWidth, neighbourHeight, coneIndex;
-
-    //Valeurs d'activations d'un groupe de 9 cônes
-    couleurHSV *conesActivationValues = (couleurHSV*)malloc(sideSize * sideSize * sizeof(couleurHSV));
+    int widthIndex, heightIndex, neighbourWidth, neighbourHeight;
 
     //Convertis l'image RVB en HSV
     tabCouleurHSV* imageHSV = tabBgrToTabHsv(image);
@@ -171,7 +106,8 @@ DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
     {
         for(heightIndex = 0; heightIndex < image->hauteurImage; heightIndex++)
         {
-            coneIndex = 0;
+            float newPixelHue = 0;
+            float sumOfActivationValues = 0;
             int range = sideSize / 2;
 
             //Parcours les 8 voisins et le point lui même
@@ -186,76 +122,42 @@ DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
                     if( (currentWidth >= 0) && (currentWidth < imageHSV->largeur) 
                             && (currentHeight >= 0) && (currentHeight < imageHSV->hauteur) )
                     {
+                        //Génère un cône aléatoire
+                        coneType cone = getRandomConeType();
+
                         //Applique le photorécepteur au point et récupère sa valeur d'activation
-                        conesActivationValues[coneIndex] = getConeActivationValue(imageHSV->tabHsv[currentWidth][currentHeight], getRandomCone() );
-                        coneIndex += 1;
+                        float activationValue = getConeActivationValue(imageHSV->tabHsv[currentWidth][currentHeight], cone );
+                        
+                        //Calcul du numérateur de la moyenne
+                        newPixelHue += cone * activationValue; 
+
+                        //Calcul du dénominateur de la moyenne
+                        sumOfActivationValues += activationValue;
                     }
                 }
             }
 
-            //Addition chelou (médian)
-            tmpTabHSV->tabHsv[widthIndex][heightIndex] = medianHSV(conesActivationValues, coneIndex, SORT_BY_HUE);
+            //Calcul de la nouvelle Hue du pixel
+            if(sumOfActivationValues != 0)
+                newPixelHue = newPixelHue / sumOfActivationValues;
+            
+            newPixelHue += imageHSV->tabHsv[widthIndex][heightIndex].h;
+
+            //Enregistre le nouveau pixel
+            couleurHSV newPixel;
+            newPixel.h = newPixelHue;
+            newPixel.s = imageHSV->tabHsv[widthIndex][heightIndex].s;
+            newPixel.v = imageHSV->tabHsv[widthIndex][heightIndex].v;
+
+            tmpTabHSV->tabHsv[widthIndex][heightIndex] = newPixel;
         }
     }
 
     return tabHsvToTabBgr(tmpTabHSV);
-//    return tabHsvToTabBgr(imageHSV);
+
 }
 
 
 
-/* @fonction
- *      Calcule et renvoie la médiane d'un tableau
- * 		1D de couleurHSV
- * 
- * @param
- * 		couleurHSV *table :   Tableau dont on cherche la médiane
- * 		int size  :   Taille de ce tableau
- *      medianSortBy attribute  :   attribut H, S ou V à trier
- * 
- * @retour
- *      couleurHSV  :   Médiane du tableau
- * */
-couleurHSV medianHSV(couleurHSV *table, int size, medianSortBy attribute)
-{ 
-	int i, j;
-	
-	for(i = size - 1; i > 0 ; i--)
-	{
-		for(j = 0; j < i - 1; j++)
-		{
-            if(attribute == SORT_BY_VALUE)
-            {
-                if(table[j+1].v < table[j].v)
-                {
-                    couleurHSV tmp = table[j+1];
-                    table[j+1] = table[j];
-                    table[j] = tmp;
-                }
-            }
-            else if(attribute == SORT_BY_SATURATION)
-            {
-                if(table[j+1].s < table[j].s)
-                {
-                    couleurHSV tmp = table[j+1];
-                    table[j+1] = table[j];
-                    table[j] = tmp;
-                }
-            }
-            else
-            {
-                if(table[j+1].h < table[j].h)
-                {
-                    couleurHSV tmp = table[j+1];
-                    table[j+1] = table[j];
-                    table[j] = tmp;
-                }
-            }
 
-			
-		}	
-	}
-	
-	return table[size/2];
-}
 
