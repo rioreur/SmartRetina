@@ -28,9 +28,9 @@ int main(int argc, char** argv)
 	}
 	if (image != NULL)
 	{
-	    /////////////////////////
-	    //--- parameter ---//
-	    /////////////////////////
+	    /////////////////////
+	    //--- parameter ---// by default, work for Images/shapes.bmp
+	    /////////////////////
 	    
 	    // the sensibility to find regions. The higher it is, the less we find regions
 	    int regionSensibility = 100; //between 0 and 255
