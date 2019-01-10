@@ -224,10 +224,7 @@ couleurRVB HSVtoRGB(float H, float S, float V)
 	rvb.r = R; 
 	rvb.v = G;
 	rvb.b = B;
-<<<<<<< HEAD
-=======
 	//printf("r:%f, v:%f, b:%f\n", R, G, B);
->>>>>>> fovea-process
 	return rvb;
 }
 
