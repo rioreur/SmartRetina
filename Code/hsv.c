@@ -23,7 +23,7 @@ float hue(float r, float g, float b, float delta)
 	// min ;
 	max = maxColor(r,g,b);
 	// min = minColor(r,g,b);
-	
+	h = -1 ; 
 	if(delta == 0)
 	{
 		h = 0 ;
@@ -92,28 +92,6 @@ couleurHSV RGBtoHSV(int R, int G, int B)
 	return hsv;
 }
 
-/*
-DonneesImageTab tabBgrToTabHsv(DonneesImageTab tabBgr)
-{
-	couleurHSV hsv ; 
-	DonneesImageTab tabHsv ; 
-	tabHsv = initTab(tabBgr->largeurImage, tabBgr->hauteurImage) ;
-	int i1, i2, i3 ; 
-	int blue, green, red ; 
-	
-	for(i1=0 ; i1<largeurImage ; i1+=1)
-	{
-		for(i2 ; i2<hauteurImage ; i2+=1)
-		{
-			hsv = RGBtoHSV( tabBgr[i1][i2][BLUE], tabBgr[i1][i2][GREEN], tabBgr[i1][i2][RED] ) ; 
-			(tabHsv[i1][i2])->tabGhsv.h ;
-			tabHsv[i1][i2][hsv.s] ; 
-			tabHsv[i1][i2][hsv.v] ;  
-		}
-	}
-	return tabHsv ; 
-}
-*/ 
 couleurHSV** alloueMatCouleurHsv(int hauteur, int largeur)
 {
 	couleurHSV** matHsv ; 
@@ -135,12 +113,11 @@ tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr)
 	int hauteurImage = tabBgr->hauteurImage ; 
 	tabStructHsv = 	(tabCouleurHSV*)malloc(sizeof(tabCouleurHSV)) ; 
 	tabStructHsv->tabHsv = alloueMatCouleurHsv(largeurImage, hauteurImage) ; 
-	int i1, i2, i3 ; 
-	int blue, green, red ; 
+	int i1, i2 ; 
 	
 	for(i1=0 ; i1<largeurImage ; i1+=1)
 	{
-		for(i2 ; i2<hauteurImage ; i2+=1)
+		for(i2=0 ; i2<hauteurImage ; i2+=1)
 		{
 			hsv = RGBtoHSV( tabBgr->donneesTab[i1][i2][BLUE], tabBgr->donneesTab[i1][i2][GREEN], tabBgr->donneesTab[i1][i2][RED] ) ; 
 			tabStructHsv->tabHsv[i1][i2] = hsv ; 
@@ -262,24 +239,6 @@ void afficheValeurCouleurHSV(matImageHSV* matHSV, int x, int y)
 	return;
 }
 
-/*
-void testFonctionHSV(DonneesImageRGB *image)
-{
-	matImageRVB* matRVB ; 
-	matImageHSV* matHSV ; 
-	printf("matRVB \n");
-	matRVB = creeMatImageRVB(image) ; 
-	printf("matHSV \n");
-	matHSV = creeMatImageHSV(matRVB);
-	printf("affiche valeur \n");
-	afficheValeurCouleurRVB(matRVB, 255,255);
-	afficheValeurCouleurHSV(matHSV, 255,255);
-	return ; 
-}
-* */
-//---FIN FONCTION HSV
-//################################
-
 
 //ALLOUE MATRICE - Matrice 2D de type short int
 short int ** alloueMatrice(int h, int l)
@@ -312,85 +271,6 @@ float** alloueMatriceFloat(int h, int l)
 	//on retourne la matrice 2D
 	return m ; 
 }
-
-//LIBERE MATRICE
-void libereMatrice(short int **m, int h, int l )
-{
-	int i;
-	//Pour toutes les cases du tableau  de pointeur de pointeur de short int de taille h(auteur)
-	for(i=0;i<h;i++)
-	{
-		//on libère le tableau de pointeur de short int
-		free(m[i]);
-	}
-	//On libère le tableau de pointeur de pointeur de short int
-	free(m) ; 
-	//On set le pointeur à NULL par sécurité (pour enlever une éventuel adresse attribuée)
-	m = NULL;
-}
-
-/*
-void cree3MatricesHSV(matImageRVB *image, float ***hue, float ***sat, float ***val)
-{
-	float **h ; 
-	float **s ; 
-	float **v ;  
-	couleurHSV hsv ;
-	int i, j;
-	int taille = image->taille ; 
-	
-	h = alloueMatriceFloat(taille, taille);
-	s = alloueMatriceFloat(taille, taille);
-	v = alloueMatriceFloat(taille, taille);
-	
-	for(i=0 ; i<taille ; i++)
-	{
-		for(j=0 ; j<taille ; j++)
-		{
-			//Conversion d'une case couleur RGB en un case couleur HSV
-			hsv = RGBtoHSV(image->r[i][j], image->v[i][j], image->b[i][j]);
-			//Déplacement dans les matrices
-			h[i][j] = hsv.h ; 
-			s[i][j] = hsv.s ; 
-			v[i][j] = hsv.v ; 
-		}
-	}
-	//On passe toutes les matrice2D qu'on a alloué au matrice passé en paramètre
-	*hue = h ;
-	*sat = s ; 
-	*val = v ;
-	return ; 
-}
-*/
-
-
-//HSV
-
-//faire division en 3 matrice h s et v
-//faire fonction qui met dans une struct
-/*
-matImageHSV* creeMatImageHSV(matImageRVB *image)
-{
-	float **h;
-	float **s;
-	float **v;
-	//struct 3 matrices de valeur h s v 
-	matImageHSV *matHSV; 
-	matHSV = (matImageHSV*)malloc(sizeof(matImageHSV));
-	matHSV->taille = image->taille ; 
-	//Allocation mémoire aux matrics h s v 
-	h = alloueMatriceFloat(image->taille, image->taille);
-	s = alloueMatriceFloat(image->taille, image->taille);
-	v = alloueMatriceFloat(image->taille, image->taille);
-	
-	cree3MatricesHSV(image, &h, &s, &v) ; 
-	matHSV->h = h;
-	matHSV->s = s;
-	matHSV->v = v;
-	
-	return matHSV ; 
-}
-*/
 
 
 

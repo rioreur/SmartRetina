@@ -56,7 +56,7 @@ typedef struct matImageHSV {
 
 
 /* Les prototypes des fonctions que nous aurons a ecrire */
-couleurRVB HSVtoRGB(float H, float S, float V);
+
 
 
 
@@ -66,8 +66,7 @@ couleurRVB HSVtoRGB(float H, float S, float V);
 short int ** alloueMatrice(int h, int l );
 float** alloueMatriceFloat(int h, int l) ; 
 
-//LIBERE MATRICE
-void libereMatrice(short int **m, int h, int l );
+
 
 //CREER 3 MATRICES
 void cree3Matrices(DonneesImageRGB *image, short int ***bleu, short int ***vert, short int ***rouge);
@@ -85,8 +84,8 @@ float saturation(float cmax, float delta);
 couleurHSV RGBtoHSV(int R, int G, int B);
 void afficheValeurCouleurHSV(matImageHSV* matHSV, int x, int y);
 void testFonctionHSV(DonneesImageRGB *image);
-//void cree3MatricesHSV(matImageRVB *image, float ***hue, float ***sat, float ***val);
-//matImageHSV* creeMatImageHSV(matImageRVB *image) ; 
+couleurRVB HSVtoRGB(float H, float S, float V);
+couleurHSV** alloueMatCouleurHsv(int hauteur, int largeur) ;
 
 
 tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr);
