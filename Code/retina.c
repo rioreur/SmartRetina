@@ -142,18 +142,19 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone)
  *      de l'image filtrée par la rétine
  * 
  * @param
- *      DonneesImageTab image   :   pointeursur l'image à filtrer
+ *      DonneesImageTab image   :   pointeur sur l'image à filtrer
+ *      int sideSize            :   taille du carré du voisinnage à prendre en compte
  * 
  * @retour
  *      DonneesImageTab* : pointeur vers la matrice crée
  */
-DonneesImageTab* applyRetina(DonneesImageTab *image)
+DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
 {
     //Indexs de tableau
     int widthIndex, heightIndex, neighbourWidth, neighbourHeight, coneIndex;
 
     //Valeurs d'activations d'un groupe de 9 cônes
-    couleurHSV *conesActivationValues = (couleurHSV*)malloc(9 * sizeof(couleurHSV));
+    couleurHSV *conesActivationValues = (couleurHSV*)malloc(sideSize * sideSize * sizeof(couleurHSV));
 
     //Convertis l'image RVB en HSV
     tabCouleurHSV* imageHSV = tabBgrToTabHsv(image);
@@ -171,11 +172,12 @@ DonneesImageTab* applyRetina(DonneesImageTab *image)
         for(heightIndex = 0; heightIndex < image->hauteurImage; heightIndex++)
         {
             coneIndex = 0;
+            int range = sideSize / 2;
 
             //Parcours les 8 voisins et le point lui même
-            for(neighbourWidth = -1; neighbourWidth <= 1; neighbourWidth++)
+            for(neighbourWidth = -range; neighbourWidth <= range; neighbourWidth++)
             {
-                for(neighbourHeight = -1; neighbourHeight <= 1; neighbourHeight++)
+                for(neighbourHeight = -range; neighbourHeight <= range; neighbourHeight++)
                 {
                     //Coordonnées du point courant
                     int currentWidth = widthIndex + neighbourWidth;

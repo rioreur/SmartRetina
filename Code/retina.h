@@ -128,11 +128,12 @@ couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone);
  * 
  * @param
  *      DonneesImageTab image   :   pointeur sur l'image à filtrer
+ *      int sideSize            :   taille du carré du voisinnage à prendre en compte
  * 
  * @retour
  *      DonneesImageTab* : pointeur vers la matrice crée
  */
-DonneesImageTab* applyRetina(DonneesImageTab *image);
+DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize);
 
 
 /* @fonction
