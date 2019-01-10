@@ -382,7 +382,7 @@ IdRegion* whatIsNeighboorsColor(DonneesImageTab* tabRegion, int x, int y)
 	return idRegion;
 }
 
-Line* getCenterLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabRegion, IdRegion* idRegion)
+Line* getCenterLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabRegion, IdRegion* idRegion, int sensibility)
 {
     int i, j;
 	Line* centerLine = initLine(tabHough->hauteurImage, tabHough->largeurImage);
@@ -406,7 +406,14 @@ Line* getCenterLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabReg
 	}
 	centerLine->angularIndex = angular/nbrLine;
 	centerLine->rIndex = radius/nbrLine;
-    return centerLine;
+	if (nbrLine > sensibility)
+	{
+        return centerLine;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 Point** getAllGravityPoints(DonneesImageTab* tabRegion, IdRegions *allIds)
@@ -466,18 +473,34 @@ Point** getAllGravityPoints(DonneesImageTab* tabRegion, IdRegions *allIds)
 void colorGravityPointRegions(DonneesImageTab* tabRegion, Point** tabPoints, int size)
 {
 	int index;
-	
+	int i;
 	for(index = 0; index < size; index++)
 	{
 		if(tabPoints[index]->coef >= 0.90)
 		{
-			//Colorise the gravity center
-			tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][BLUE] = 255 - 
-			    tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][BLUE];
-			tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][GREEN] = 255 - 
-			    tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][GREEN];
-			tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][RED] = 255 - 
-			    tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y][RED];
+		    for(i = -2; i <= 2; i++)
+		    {
+	            if (0 <= tabPoints[index]->x + i && tabPoints[index]->x + i < tabRegion->largeurImage)
+	            {
+		            // Colorise the center of gravity
+		            tabRegion->donneesTab[tabPoints[index]->x + i][tabPoints[index]->y][BLUE] = 255 - 
+		                tabRegion->donneesTab[tabPoints[index]->x + i][tabPoints[index]->y][BLUE];
+		            tabRegion->donneesTab[tabPoints[index]->x + i][tabPoints[index]->y][GREEN] = 255 - 
+		                tabRegion->donneesTab[tabPoints[index]->x + i][tabPoints[index]->y][GREEN];
+		            tabRegion->donneesTab[tabPoints[index]->x + i][tabPoints[index]->y][RED] = 255 - 
+		                tabRegion->donneesTab[tabPoints[index]->x + i][tabPoints[index]->y][RED];
+		        }
+		        if (0 <= tabPoints[index]->y + i && tabPoints[index]->y + i < tabRegion->hauteurImage)
+	            {
+		            // Colorise the center of gravity
+		            tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y + i][BLUE] = 255 - 
+		                tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y + i][BLUE];
+		            tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y + i][GREEN] = 255 - 
+		                tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y + i][GREEN];
+		            tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y + i][RED] = 255 - 
+		                tabRegion->donneesTab[tabPoints[index]->x][tabPoints[index]->y + i][RED];
+		        }
+			}
 		}
 	}
 }

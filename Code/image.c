@@ -502,6 +502,31 @@ Histogram* createHistogram(DonneesImageTab* tabImage, int color)
 	return histogram;
 }
 
+int getMedianHistogram(Histogram* histogram)
+{
+     // We copy the values in the histogram in "temp" and we calculate the total sum of the value in the histogram
+    int temp[histogram->size];
+    int total = 0;
+    int i;
+    for(i = 0; i < histogram->size; i++)
+    {
+        temp[i] = histogram->values[i];
+        total += temp[i];
+    }
+    // We sort the values in "temp"
+    qsort(temp, histogram->size, sizeof(int), pixelComp);
+    // We find the median index
+    int sum = 0;
+    int medianValue = 0;
+    while(sum < ((float)total)/4.25)
+    {
+         sum += temp[medianValue];
+         medianValue++;
+    }
+    printf("\t%d, %d\n", histogram->size - medianValue, total);
+    return histogram->size - medianValue;
+}
+
 DonneesImageRGB* histogramToRGB(Histogram* histogram)
 {
 	// We init the image which will contain the histogram
