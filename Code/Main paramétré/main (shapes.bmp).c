@@ -38,15 +38,15 @@ int main(int argc, char** argv)
 	    /////////////////////
 	    
 	    // the sensibility to find regions. The higher it is, the less we find regions
-	    int regionSensibility = 380; //between 0 and 441
+	    int regionSensibility = 100; //between 0 and 255
 	    // the sensibility to create the hough transform. The higher it is, the less we'll put lines in the hough transform
 	    //it is use to check the edge of the shapes on the image. It will check more edge if this number is lower
-	    int houghSensibility = 230; //between 0 and 255
+	    int houghSensibility = 100; //between 0 and 255
 	    // the median value threshhold for the hough transform. the higher it is, the less we find potential lines.
 	    //everything below this value on the houghTransform will become black, and everything above will become white
-	    int houghMedianValue = 120; //between 0 and 255
+	    int houghMedianValue = 70; //between 0 and 255
 	    // the sensibility to find regions on the final hough transform. The higher it is, the less we find potential lines
-	    int regionHoughSensibility = 440; //between 0 and 441
+	    int regionHoughSensibility = 100; //between 0 and 255
 	    // the minimum size a region on the hough transform must have to be counted as a line
 	    int regionHoughSize = 0; //minimum 0
 	    
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
 		cutBetweenLevel(tabHough, houghMedianValue, 255);
 		cutBetweenLevel(tabHough, 0, houghMedianValue);
 		//Making sure to have a blob around each point to find the regions easily with a dillatation filter
-		//applyDillatationFilter(tabHough, 200);
+		applyDillatationFilter(tabHough, 200);
 		printf(" Creating the image of the hough transform\n");
 		DonneesImageRGB* houghImage = houghToRGB(tabHough);
 		ecrisBMPRGB_Dans(houghImage, "3 - hough.bmp");
