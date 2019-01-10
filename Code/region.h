@@ -48,8 +48,9 @@ IdRegions* findRegionFlow(DonneesImageTab* tabImage, DonneesImageTab* tabRegion,
 // Give the color of a neighboor
 IdRegion* whatIsNeighboorsColor(DonneesImageTab* tabRegion, int x, int y);
 
-// Returns the line who appears the most in the given Hough transform region
-Line* getCenterLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabRegion, IdRegion* idRegion);
+// Returns the line who appears the most in the given Hough transform region.
+//Sensibility is the minimum number of pixel that must be on the region to be counted as a line
+Line* getCenterLineFromRegion(DonneesImageTab* tabHough, DonneesImageTab* tabRegion, IdRegion* idRegion, int sensibility);
 
 // Returns a list of all the center of gravity of all regions in tabRegion
 Point** getAllGravityPoints(DonneesImageTab* tabRegion, IdRegions *allIds);

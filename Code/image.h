@@ -163,6 +163,8 @@ void cutBetweenLevel(DonneesImageTab* tabImage, int min, int max);
 
 // Create an histogram from the given DonneesImageTab for the given color (BLUE, RED or GREEN)
 Histogram* createHistogram(DonneesImageTab* tabImage, int color);
+// Return the median value of an image using his hostogram
+int getMedianHistogram(Histogram* histogram);
 // Convert the histogram to a DonneesImageRGB
 DonneesImageRGB* histogramToRGB(Histogram* histogram);
 
