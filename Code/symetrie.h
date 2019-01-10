@@ -25,4 +25,8 @@ int getArea(DonneesImageTab* tabShape);
 
 // Create a Hough transform from the given DonneesImageTab
 DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int step);
+// Returns true if the pixel at the given coordinate in tabRegion is at the border of the region defined by idRegion
+bool isARegionBorder(DonneesImageTab* tabRegion, IdRegion* idRegion, int x, int y);
+// Returns a donnesImageTab wich contain only the edge of a region
+DonneesImageTab* getShapeEdge(DonneesImageTab* tabRegion, IdRegion* idRegion);
 

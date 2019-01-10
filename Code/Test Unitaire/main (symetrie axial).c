@@ -37,16 +37,25 @@ int main(int argc, char** argv)
 		printf("Filtering the image with a median filter\n");
 		DonneesImageTab* medianTabImage = applyMedianFilterOnTab(tabImage, 3, 3);
 		
-		// Test of the function used to create and apply a gradiant filter
-		printf("Filtering the median image with a gradiant filter\n");
-		DonneesImageTab* gradiantTabImage = applyGradiantFilterOnTab(medianTabImage, PREWITT); //PREWITT ou SOBEL
-		printf(" Creating the filtered image\n");
-		DonneesImageRGB* gradiantImage = tabToRGB(gradiantTabImage);
-		ecrisBMPRGB_Dans(gradiantImage, "1 - gradiant.bmp");
+		// Test of the function used to find region by flooding the image
+		printf("Creating regions\n");
+		DonneesImageTab* tabRegion = initTabRegion(medianTabImage->largeurImage, medianTabImage->hauteurImage);
+		IdRegions* idRegions = findAllRegionBottomUp(medianTabImage, tabRegion, 200);
+		printf(" Regions found : %d\n", idRegions->size);
+		DonneesImageRGB* regionImage = tabToRGB(tabRegion);
+		printf(" Creating the image of the regions\n");
+		ecrisBMPRGB_Dans(regionImage, "2 - region.bmp");
 		
-		// Test of the function used to create a hough transform
+		// Test of the function to get the borders
+		printf("Creating the edge of the region\n");
+		DonneesImageTab* tabEdge = getShapeEdge(tabRegion, idRegions->regions[1]);
+		printf(" Creating the image of the edge\n");
+		DonneesImageRGB* edgeImage = tabToRGB(tabEdge);
+		ecrisBMPRGB_Dans(edgeImage, "3 - edge.bmp");
+		
+		// Test of the function used to aproximate the axis
 		printf("Creating the Hough transformation of the gradiant image\n");
-		DonneesImageTab* tabHough = createTabAxis(gradiantTabImage, 100, 5);
+		DonneesImageTab* tabHough = createTabAxis(tabEdge, 100, 1);
 		printf(" Edit it so it is easier to use\n");
         //  Making every point black or white
 		/*cutBetweenLevel(tabHough, 80, 255); // need to find what to put for the min (histogram ?)
@@ -55,25 +64,15 @@ int main(int argc, char** argv)
 		applyDillatationFilter(tabHough, 200);
 		printf(" Creating the image of the hough transform\n");
 		DonneesImageRGB* houghImage = houghToRGB(tabHough);
-		ecrisBMPRGB_Dans(houghImage, "2 - hough.bmp");
+		ecrisBMPRGB_Dans(houghImage, "4 - hough.bmp");
 		
-		// Test of the function used to find region by flooding the image
-		/*printf("Creating a region for each lines on the hough transform \n");
-		DonneesImageTab* tabRegion = initTabRegion(tabHough->largeurImage, tabHough->hauteurImage);
-		IdRegions* idRegions = findAllRegionBottomUp(tabHough, tabRegion, 200);
-		printf(" Regions found : %d\n", idRegions->size);
-		DonneesImageRGB* regionImage = tabToRGB(tabRegion);
-		printf(" Creating the image of the hough regions\n");
-		ecrisBMPRGB_Dans(regionImage, "3 - region.bmp");*/
-		
-		printf("Finding the lines on each regions\n");
 		// Test of the functions used to get the line in the hough transform
 		DonneesImageTab* newTabImage = cpyTab(tabImage);
 	    printf(" Finding line\n");
 	    Line* line = getMaxLine(tabHough);
-	    updateLineInfo(gradiantTabImage, line, 200);
+	    updateLineInfo(tabEdge, line, 200);
 	    traceLineOnImage(newTabImage, line, 255, 0, 0);
-	    printf(" %d, %f\n", line->rIndex, (float)line->angularIndex/line->maxAngularIndex * 360);
+	    printf(" %d, %f\n", line->rIndex, nmap(line->angularIndex, 0, line->maxAngularIndex, 0, 180));
 	        free(line);
 		printf(" Creating the image to show the found lines in red\n");
 		DonneesImageRGB* newImage = tabToRGB(newTabImage);
@@ -87,14 +86,15 @@ int main(int argc, char** argv)
 		
 		libereDonneesTab(&medianTabImage);
 		
-		libereDonneesTab(&gradiantTabImage);
+		libereDonneesTab(&tabRegion);
+		libereDonneesImageRGB(&regionImage);
+		destructIdRegions(&idRegions);
+		
+		libereDonneesTab(&tabEdge);
+		libereDonneesImageRGB(&edgeImage);
 		
 		libereDonneesTab(&tabHough);
 		libereDonneesImageRGB(&houghImage);
-		
-		/*libereDonneesTab(&tabRegion);
-		libereDonneesImageRGB(&regionImage);
-		destructIdRegions(&idRegions);*/
 		
 		libereDonneesTab(&newTabImage);
 		libereDonneesImageRGB(&newImage);
