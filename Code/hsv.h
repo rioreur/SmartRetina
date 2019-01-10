@@ -89,4 +89,4 @@ void testFonctionHSV(DonneesImageRGB *image);
 //matImageHSV* creeMatImageHSV(matImageRVB *image) ; 
 
 
-
+tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr);
