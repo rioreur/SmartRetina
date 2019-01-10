@@ -18,6 +18,8 @@ bool isABorder(DonneesImageTab* tabShape, int x, int y);
 void drawShape(DonneesImageTab* tabImage, DonneesImageTab* tabShape, int x, int y);
 // Give the area in pixels of the given shape
 int getArea(DonneesImageTab* tabShape);
+// calculate the coeficient of Minkovski of every region and store it in the given point
+void updateCoefGravityPoint(Point** gravityPoints, DonneesImageTab* tabRegion, IdRegions* allIds);
 
 //////////////////////////
 //--- Axial symmetry ---//

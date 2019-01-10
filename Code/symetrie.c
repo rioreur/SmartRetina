@@ -81,7 +81,6 @@ DonneesImageTab* getShape(DonneesImageTab* tabRegion,  IdRegion* idRegion)
 		}
 	}
 
-    printf("%d, %d\n%d, %d\n", startX, endX, startY, endY);
 	// If we have found the width and the height of the region
 	if (endX >= 0 && endY >= 0 && startX >= 0 && startY >= 0)
 	{
@@ -327,6 +326,40 @@ int getArea(DonneesImageTab* tabShape)
 		}
 	}
 	return area;
+}
+
+void updateCoefGravityPoint(Point** gravityPoints, DonneesImageTab* tabRegion, IdRegions* allIds)
+{
+    int i, j;
+    int pointIndex = -1;
+    DonneesImageTab* tabShape = NULL;
+    DonneesImageTab* tabSymetricShape = NULL;
+    DonneesImageTab* tabGlobal = NULL;
+    for(i = 1; i < allIds->size; i++)
+    {
+        // We get the shape of the current region
+	    tabShape = getShape(tabRegion, allIds->regions[i]);
+	    // We create his symetric
+	    tabSymetricShape = getSymetricShape(tabShape);
+	    // We create the global shape using the addition of Minkovski
+	    tabGlobal = createGlobalShape(tabShape, tabSymetricShape);
+	    for(j = 0; j < allIds->size-1; j++)
+	    {
+	        if (gravityPoints[j]->label == allIds->regions[i]->label)
+	        {
+	            pointIndex = j;
+	        }
+	    }
+	    if (pointIndex != -1)
+	    {
+	        gravityPoints[pointIndex]->coef = ((float) getArea(tabShape))/((float) getArea(tabGlobal)/4);
+	        pointIndex = -1;
+	    }
+	
+	    libereDonneesTab(&tabShape);
+	    libereDonneesTab(&tabSymetricShape);
+	    libereDonneesTab(&tabGlobal);
+	}
 }
 
 DonneesImageTab* createTabAxis(DonneesImageTab* tabImage, int sensibility, int step)
