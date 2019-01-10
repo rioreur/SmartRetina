@@ -88,6 +88,55 @@ Cone getRandomCone(void)
     return newCone;
 }
 
+
+/* @fonction
+ *      Renvoie la valeur d'activation d'un cône
+ *      en prenant en compte la couleur HSV à
+ *      laquelle il est exposé
+ * 
+ * @param
+ *      couleurHSV color : couleur exposée
+ *      Cone currentCone : cone à tester
+ * 
+ * @retour
+ *      couleurHSV : valeur d'activation du cône
+ */
+couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone)
+{
+    // Noir pas défaut
+    couleurHSV *activationValue;
+    activationValue->h = -1;
+    activationValue->s = 0;
+    activationValue->v = 0;
+
+    if(color.v < currentCone.valueThreshold)
+    {     
+        // Si c'est un cône rouge, l'intervalle de Hue a un traitement spécial
+        if(currentCone.type == LONG)
+        {
+            if(color.h >= currentCone.minHue && color.h < 360
+                || color.h >= 0 && color.h <= currentCone.maxHue)
+            {
+                activationValue->h = color.h;
+                activationValue->s = color.s;
+                activationValue->v = color.v;
+            }
+        }
+        else
+        {
+            if(color.h >= currentCone.minHue && color.h <= currentCone.maxHue)
+            {
+                activationValue->h = color.h;
+                activationValue->s = color.s;
+                activationValue->v = color.v;
+            }
+        }
+    }
+
+    return activationValue;
+}
+
+
 /* @fonction
  *      Crée une matrice DonneesImageTab contenant le résultat
  *      de l'image filtrée par la rétine
@@ -114,7 +163,7 @@ DonneesImageTab* applyRetina(DonneesImageTab image)
             //Pour chaque point, convertis son RVB en HSV
             //Génère 9 photorécepteurs
             //Applique les au voisinage
-            //Addition chelou
+            //Addition chelou (gradient ? médian ?)
         }
     }
 

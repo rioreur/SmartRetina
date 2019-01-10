@@ -99,6 +99,21 @@ Cone getRandomCone(void);
 
 
 /* @fonction
+ *      Renvoie la valeur d'activation d'un cône
+ *      en prenant en compte la couleur HSV à
+ *      laquelle il est exposé
+ * 
+ * @param
+ *      couleurHSV color : couleur exposée
+ *      Cone currentCone : cone à tester
+ * 
+ * @retour
+ *      couleurHSV : valeur d'activation du cône
+ */
+couleurHSV getConeActivationValue(couleurHSV color, Cone currentCone);
+
+
+/* @fonction
  *      Crée une matrice DonneesImageTab contenant le résultat
  *      de l'image filtrée par la rétine
  * 
