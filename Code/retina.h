@@ -64,7 +64,7 @@ coneType getRandomConeType(void);
  * @retour
  *      float : valeur d'activation du cône
  */
-float getConeActivationValue(couleurHSV color, coneType currentCone);
+float getConeActivationValue(colorHSV color, coneType currentCone);
 
 
 /* @fonction

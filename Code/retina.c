@@ -58,15 +58,15 @@ coneType getRandomConeType(void)
  *      laquelle il est exposé
  * 
  * @param
- *      couleurHSV color : couleur exposée
+ *      colorHSV color : couleur exposée
  *      Cone currentCone : cone à tester
  * 
  * @retour
  *      float : valeur d'activation du cône
  */
-float getConeActivationValue(couleurHSV color, coneType currentCone)
+float getConeActivationValue(colorHSV color, coneType currentCone)
 {
-    int pixelHue = color.h;
+    int pixelHue = color.hue;
     int coneHue = currentCone;
 
 
@@ -83,7 +83,7 @@ float getConeActivationValue(couleurHSV color, coneType currentCone)
         distanceHues = distanceOneWay;
     }
 
-    return ((360 - distanceHues)/360) * color.v * color.s;
+    return ((360 - distanceHues)/360) * color.value * color.saturation;
 }
 
 
@@ -103,14 +103,14 @@ DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
     //Indexs de tableau
     int widthIndex, heightIndex, neighbourWidth, neighbourHeight;
 
-    //Convertis l'image RVB en HSV
-    tabCouleurHSV* imageHSV = tabBgrToTabHsv(image);
+    //Convertis l'image BGR en HSV
+    arrayColorHSV* imageHSV = arrayBGRToArrayHSV(image);
 
     //Matrice HSV temporaire
-    tabCouleurHSV* tmpTabHSV = (tabCouleurHSV*)malloc(sizeof(tabCouleurHSV)) ;
-    tmpTabHSV->largeur = imageHSV->largeur; 
-    tmpTabHSV->hauteur = imageHSV->hauteur; 
-    tmpTabHSV->tabHsv = alloueMatCouleurHsv(tmpTabHSV->largeur, tmpTabHSV->hauteur) ;
+    arrayColorHSV* tmpTabHSV = (arrayColorHSV*)malloc(sizeof(arrayColorHSV)) ;
+    tmpTabHSV->width = imageHSV->width; 
+    tmpTabHSV->height = imageHSV->height; 
+    tmpTabHSV->arrayHSV = allocateMatColorHSV(tmpTabHSV->width, tmpTabHSV->height) ;
 
 
     //Parcours le tableau
@@ -131,17 +131,17 @@ DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
                     int currentWidth = widthIndex + neighbourWidth;
                     int currentHeight = heightIndex + neighbourHeight;
 
-                    if( (currentWidth >= 0) && (currentWidth < imageHSV->largeur) 
-                            && (currentHeight >= 0) && (currentHeight < imageHSV->hauteur) )
+                    if( (currentWidth >= 0) && (currentWidth < imageHSV->width) 
+                            && (currentHeight >= 0) && (currentHeight < imageHSV->height) )
                     {
                         //Génère un cône aléatoire
                         coneType cone = getRandomConeType();
 
                         //Applique le photorécepteur au point et récupère sa valeur d'activation
-                        float activationValue = getConeActivationValue(imageHSV->tabHsv[currentWidth][currentHeight], cone );
+                        float activationValue = getConeActivationValue(imageHSV->arrayHSV[currentWidth][currentHeight], cone );
                         
                         //Calcul du numérateur de la moyenne
-                        newPixelHue += (imageHSV->tabHsv[widthIndex][heightIndex].h - cone) * activationValue; 
+                        newPixelHue += (imageHSV->arrayHSV[widthIndex][heightIndex].hue - cone) * activationValue; 
 
                         //Calcul du dénominateur de la moyenne1
                         sumOfActivationValues += activationValue;
@@ -153,19 +153,19 @@ DonneesImageTab* applyRetina(DonneesImageTab *image, int sideSize)
             if(sumOfActivationValues != 0)
                 newPixelHue = newPixelHue / sumOfActivationValues;
             
-            newPixelHue = (newPixelHue + (int)imageHSV->tabHsv[widthIndex][heightIndex].h + 360)%360;
+            newPixelHue = (newPixelHue + (int)imageHSV->arrayHSV[widthIndex][heightIndex].hue + 360)%360;
 
             //Enregistre le nouveau pixel
-            couleurHSV newPixel;
-            newPixel.h = newPixelHue;
-            newPixel.s = imageHSV->tabHsv[widthIndex][heightIndex].s;
-            newPixel.v = imageHSV->tabHsv[widthIndex][heightIndex].v;
+            colorHSV newPixel;
+            newPixel.hue = newPixelHue;
+            newPixel.saturation = imageHSV->arrayHSV[widthIndex][heightIndex].saturation ;
+            newPixel.value = imageHSV->arrayHSV[widthIndex][heightIndex].value ;
 
-            tmpTabHSV->tabHsv[widthIndex][heightIndex] = newPixel;
+            tmpTabHSV->arrayHSV[widthIndex][heightIndex] = newPixel;
         }
     }
 
-    return tabHsvToTabBgr(tmpTabHSV);
+    return arrayHSVToArrayBGR(tmpTabHSV);
 
 }
 

@@ -7,84 +7,163 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define MaxTableau 500
-#define MaxMatrice 500
-#define BLANC 255
-#define NOIR 0
-#define NAC -1
+/** @struct colorBGR
+ *  @brief This structure represent a BGR color 
+ *  
+ *	@Members : 
+ * 		blue : contain the blue value of the color
+ * 		green: contain the green value of the color
+ * 		red  : contain the red value of the color
+ */
+typedef struct colorBGR {
+	int blue, green, red ; 
+}colorBGR ;
 
-//definition des types
+/** @struct colorHSV
+ *  @brief This structure represent a HSV color 
+ *  
+ *	@Members : 
+ * 		hue 	   : contain the hue value of the color
+ * 		saturation : contain the saturantion value of the color
+ * 		value  	   : contain the value of the color
+ */
+typedef struct colorHSV {
+	float hue, saturation, value ;
+}colorHSV ; 
 
-typedef int Tableau[MaxTableau];
-typedef float Matrice[MaxMatrice][MaxMatrice];
-
-
-
-
-//struct couleurRVB comportant les coordonnées du pixel
-// dans les trois matrices R V B 
-typedef struct couleurRVB {
-	int x, y;
-	int r, v, b;
-}couleurRVB;
-
-typedef struct couleurHSV {
-	float h, s, v ;
-}couleurHSV ; 
-
-typedef struct tabCouleurHSV {
-	int largeur ; 
-	int hauteur ;
-	couleurHSV** tabHsv ; 
-} tabCouleurHSV; 
-
-
-//struct matImageHSV comportant 3 matrice image 2D
-//(un pixel a trois valeurs (h = hue = teinte, s = saturation, v = value = niveau (luminosité) )
-typedef struct matImageHSV {
-	int taille;
-	float **h;
-	float **s;
-	float **v;
-} matImageHSV ; 
-
-/* Largeur et hauteur par defaut d'une fenetre correspondant a nos criteres */
-#define LargeurFenetre LargeurImageBMPLib
-#define HauteurFenetre HauteurImageBMPLib
-#define Pixel_Min_Value 0
-#define Pixel_Max_Value 255
+/** @struct arrayColorHSV
+ *  @brief This structure represent an array of color HSV
+ *  
+ *	@Members : 
+ * 		width    : contain the value of the image's width
+ * 		height 	 : contain the value of the image's height
+ * 		arrayHSV : contain the 2D array of colorHSV
+ */
+typedef struct arrayColorHSV {
+	int width ; 
+	int height ;
+	colorHSV** arrayHSV; 
+} arrayColorHSV; 
 
 
-/* Les prototypes des fonctions que nous aurons a ecrire */
-
-
-
-
-
-
-//ALLOUE MATRICE
-short int ** alloueMatrice(int h, int l );
-float** alloueMatriceFloat(int h, int l) ; 
-
-
-
-//CREER 3 MATRICES
-void cree3Matrices(DonneesImageRGB *image, short int ***bleu, short int ***vert, short int ***rouge);
-
-//CREE IMAGE
-DonneesImageRGB *creeImage(int h, int l, short int **r, short int **v, short int **b);
-
-//##################################################
 //Fonction HSV
+/* @fonction		:	Return the value of a number divided by 255
+ *						
+ * 
+ * @param			:
+ * 		
+ * 		number		: 	A number
+ * 
+ * @retour		 	:	The number divided by 255
+ */
 float divide255(int color);
-float maxColor(float r, float g, float b);
-float minColor(float r, float g, float b);
-float hue(float r, float g, float b, float delta);
-float saturation(float cmax, float delta);
-couleurHSV RGBtoHSV(int R, int G, int B);
-void afficheValeurCouleurHSV(matImageHSV* matHSV, int x, int y);
-void testFonctionHSV(DonneesImageRGB *image);
-couleurRVB HSVtoRGB(float H, float S, float V);
-couleurHSV** alloueMatCouleurHsv(int hauteur, int largeur) ;
-tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr);
-DonneesImageTab* tabHsvToTabBgr(tabCouleurHSV* tabHsv);
+
+/* @fonction		:	Return the maximum value from the three color of a pixel
+ *						
+ * 
+ * @param			:
+ * 		
+ *		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 
+ * @retour		 	:	The maximum value between the three number
+ */
+float maxColor(float red, float green, float blue);
+
+/* @fonction		:	Return the minimum value from the three color of a pixel
+ *						
+ * 
+ * @param			:
+ * 		
+ *		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 
+ * @retour		 	:	The minimum value between the three number
+ */
+float minColor(float red, float green, float blue);
+
+/* @fonction		:	Return the value of the hue from a color pixel blue, green, red
+ *						
+ * 
+ * @param			:
+ * 		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 		delta		: 	Value of the delta use in the BGR to HSV calculus conversion
+ * 
+ * @retour		 	:	Value of the hue
+ */
+float hue(float red, float green, float blue, float delta);
+
+/* @fonction		:	Return the value of the saturation use by the HSV to BGR color function
+ *						
+ * 
+ * @param			:
+ * 		colorMax	: 	Value of the maximum color between blue green red of a pixel
+ * 		delta		: 	Value of the delta use in the BGR to HSV calculus conversion
+ * 
+ * @retour		 	:	Value of the saturation
+ */
+float saturation(float colorMax, float delta);
+
+/* @fonction		:	Return the HSV equivalent of a BGR color 
+ *						
+ * 
+ * @param			:
+ * 		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 		delta		: 	Value of the delta use in the BGR to HSV calculus conversion
+ * 
+ * @retour		 	:	Value of the hue
+ */
+colorHSV BGRtoHSV(int blue, int green, int red) ;
+
+
+/* @fonction		:	Return the BGR color equivalent of a HSV color 
+ *						
+ * 
+ * @param			:
+ * 		hue			: 	Hue of a HSV color
+ *      saturation	: 	Saturation of a HSV color
+ * 		value		: 	Value of a HSV color
+ * 
+ * @retour		 	:	Struct with the values of a BGR color
+ */
+colorBGR HSVtoBGR(float hue, float saturation, float value) ;
+
+/* @fonction		:	Allocate a HSV matrix with its height and width
+ *						
+ * 
+ * @param			:
+ * 		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 		delta		: 	Value of the delta use in the BGR to HSV calculus conversion
+ * 
+ * @retour		 	:	Value of the hue
+ */
+colorHSV** allocateMatColorHSV(int height, int width) ;
+
+/* @fonction		:	Conversion of an array of BGR values to an array of HSV values
+ *						
+ * 
+ * @param			:
+ * 		arrayBGR	: 	Array of BGR values
+ * 
+ * 
+ * @retour		 	:	Array of HSV values
+ */
+arrayColorHSV* arrayBGRToArrayHSV(DonneesImageTab* arrayBGR) ;
+
+/* @fonction		:	Conversion of an array of HSV values to an array of BGR values
+ *						
+ * 
+ * @param			:
+ *  arrayStructHSV	: 	Struct with an array of HSV values
+ * 
+ * @retour		 	:	Struct with an array of BGR values 
+ */
+DonneesImageTab* arrayHSVToArrayBGR(arrayColorHSV* arrayHSV) ;
