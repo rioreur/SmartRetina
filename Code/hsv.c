@@ -2,270 +2,317 @@
 
 //------FONCTION HSV
 //################################
-float divide255(int color)
+
+
+/* @fonction		:	Return the value of a number divided by 255
+ *						
+ * 
+ * @param			:
+ * 		
+ * 		number		: 	A number
+ * 
+ * @retour		 	:	The number divided by 255
+ */
+float divide255(int number)
 {
-	return( (float)color / 255) ; 	
+	return( (float)number / 255) ; 	
 }
 
-float maxColor(float r, float g, float b)
+/* @fonction		:	Return the maximum value from the three color of a pixel
+ *						
+ * 
+ * @param			:
+ * 		
+ *		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 
+ * @retour		 	:	The maximum value between the three number
+ */
+float maxColor(float blue, float green, float red)
 {
-	return fmaxf(fmaxf(r,g),b);
+	return fmaxf(fmaxf(red,green),blue);
 }
 
-float minColor(float r, float g, float b)
+/* @fonction		:	Return the minimum value from the three color of a pixel
+ *						
+ * 
+ * @param			:
+ * 		
+ *		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 
+ * @retour		 	:	The minimum value between the three number
+ */
+float minColor(float blue, float green, float red)
 {
-	return fminf(fminf(r,g),b);
+	return fminf(fminf(red,green),blue);
 }
 
-float hue(float r, float g, float b, float delta)
+/* @fonction		:	Return the value of the hue from a color pixel blue, green, red
+ *						
+ * 
+ * @param			:
+ * 		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 		delta		: 	Value of the delta use in the BGR to HSV calculus conversion
+ * 
+ * @retour		 	:	Value of the hue
+ */
+float hue(float blue, float green, float red, float delta)
 {
-	float max, h ; 
-	// min ;
-	max = maxColor(r,g,b);
-	// min = minColor(r,g,b);
-	h = -1 ; 
+	float max, hue ; 
+	max = maxColor(blue,green,red);
+	hue = -1 ; 
 	if(delta == 0)
 	{
-		h = 0 ;
+		hue = 0 ;
 	}
-	else if(max == r)
+	else if(max == red)
 	{
-		h =  60 * (((g - b ) / delta))  ;
+		hue =  60 * (((green - blue ) / delta))  ;
 	}
-	else if (max == g)
+	else if (max == green)
 	{
-		h = 60 * (((b - r ) / delta) + 2 ) ; 
+		hue = 60 * (((blue - red ) / delta) + 2 ) ; 
 	}
-	else if (max == b)
+	else if (max == blue)
 	{
-		h = 60 * (((r - g) / delta) + 4 ) ; 
+		hue = 60 * (((red - green) / delta) + 4 ) ; 
 	}
-	if(h<0)
+	if(hue<0)
 	{
-		h = h + 360 ;
+		hue = hue + 360 ;
 	}
-	return h ; 
+	return hue ; 
 }
 
-float saturation(float cmax, float delta)
+/* @fonction		:	Return the value of the saturation use by the HSV to BGR color function
+ *						
+ * 
+ * @param			:
+ * 		colorMax	: 	Value of the maximum color between blue green red of a pixel
+ * 		delta		: 	Value of the delta use in the BGR to HSV calculus conversion
+ * 
+ * @retour		 	:	Value of the saturation
+ */
+float saturation(float colorMax, float delta)
 {
-	if(cmax == 0)
+	if(colorMax == 0)
 	{
 		return 0 ; 
 	}
 	else
 	{
-		return delta/cmax ; 
+		return delta/colorMax ; 
 	}
 }
 
-
-couleurHSV RGBtoHSV(int R, int G, int B)
+/* @fonction		:	Return the HSV equivalent of a BGR color 
+ *						
+ * 
+ * @param			:
+ * 		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 		delta		: 	Value of the delta use in the BGR to HSV calculus conversion
+ * 
+ * @retour		 	:	Value of the hue
+ */
+colorHSV BGRtoHSV(int blue, int green, int red)
 {
-	float delta, Cmax, r2, g2, b2 ;
-	couleurHSV hsv; 
+	float delta, colorMax, red255, green255, blue255 ;
+	colorHSV hsv; 
 	
-	r2 = divide255(R);
-	g2 = divide255(G);
-	b2 = divide255(B);
-	/*
-	printf("r2 : %f\n", r2);
-	printf("g2 : %f\n", g2);
-	printf("b2 : %f\n", b2);
-	*/
-	Cmax = maxColor(r2,g2,b2);
-	//printf("Cmax : %f\n", Cmax);
-	delta = Cmax - minColor(r2,g2,b2) ; 
-	//printf("delta : %f\n", delta);
+	red255 = divide255(red);
+	green255 = divide255(green);
+	blue255 = divide255(blue);
 	
-	hsv.h = hue(r2, g2, b2, delta); 
-	hsv.s = saturation(Cmax, delta);
-	hsv.v = Cmax ; 
-	/*
-	printf("R : %d\n", R);
-	printf("G : %d\n", G);
-	printf("B : %d\n", B);
-	printf("\n H : %f\n", hsv.h);
-	printf("S : %f\n", hsv.s);
-	printf("V : %f\n", hsv.v);
-	*/
+	colorMax = maxColor(blue255,green255,red255);
+	
+	delta = colorMax - minColor(blue255,green255,red255) ; 
+	
+	hsv.hue = hue(blue255, green255, red255, delta); 
+	hsv.saturation = saturation(colorMax, delta);
+	hsv.value = colorMax ; 
 	return hsv;
 }
 
-couleurHSV** alloueMatCouleurHsv(int hauteur, int largeur)
+/* @fonction		:	Allocate a HSV matrix with its height and width
+ *						
+ * 
+ * @param			:
+ * 		blue		: 	Value of the color blue from a pixel in blue green red
+ *      green		: 	Value of the color green from a pixel in blue green red
+ * 		red			: 	Value of the color red from a pixel in blue green red
+ * 		delta		: 	Value of the delta use in the BGR to HSV calculus conversion
+ * 
+ * @retour		 	:	Value of the hue
+ */
+colorHSV** allocateMatColorHSV(int height, int width)
 {
-	couleurHSV** matHsv ; 
+	colorHSV** matHSV ; 
 	int i ;
-	matHsv = (couleurHSV**)malloc(sizeof(couleurHSV*) * largeur ) ; 
-	for(i=0;i<hauteur;i++)
+	matHSV = (colorHSV**)malloc(sizeof(colorHSV*) * width ) ; 
+	for( i=0 ; i<height ; i++)
 	{
-		matHsv[i] = (couleurHSV*)malloc(sizeof(couleurHSV)*largeur);
+		matHSV[i] = (colorHSV*)malloc(sizeof(colorHSV)*width) ;
 	}
 	//on retourne la matrice CouleurHsv
-	return matHsv ; 
+	return matHSV ; 
 }
 
-tabCouleurHSV* tabBgrToTabHsv(DonneesImageTab* tabBgr)
+/* @fonction		:	Conversion of an array of BGR values to an array of HSV values
+ *						
+ * 
+ * @param			:
+ * 		arrayBGR	: 	Array of BGR values
+ * 
+ * 
+ * @retour		 	:	Array of HSV values
+ */
+arrayColorHSV* arrayBGRToArrayHSV(DonneesImageTab* arrayBGR)
 {
-	couleurHSV hsv ;
-	tabCouleurHSV* tabStructHsv ; 
-	tabStructHsv = 	(tabCouleurHSV*)malloc(sizeof(tabCouleurHSV)) ;
-	tabStructHsv->largeur = tabBgr->largeurImage ; 
-	tabStructHsv->hauteur = tabBgr->hauteurImage ; 
-	tabStructHsv->tabHsv = alloueMatCouleurHsv(tabStructHsv->largeur, tabStructHsv->hauteur) ; 
-	int i1, i2 ; 
+	colorHSV hsv ;
+	arrayColorHSV* arrayStructHSV ; 
+	arrayStructHSV = (arrayColorHSV*)malloc(sizeof(arrayColorHSV)) ;
+	arrayStructHSV->width = arrayBGR->largeurImage ; 
+	arrayStructHSV->height = arrayBGR->hauteurImage ; 
+	arrayStructHSV->arrayHSV = allocateMatColorHSV(arrayStructHSV->width, arrayStructHSV->height) ; 
+	int column, line ; 
 	
-	for(i1=0 ; i1<tabStructHsv->largeur ; i1+=1)
+	for(column=0 ; column < arrayStructHSV->width ; column+=1)
 	{
-		for(i2=0 ; i2<tabStructHsv->hauteur ; i2+=1)
+		for(line=0 ; line < arrayStructHSV->height ; line+=1)
 		{
-			hsv = RGBtoHSV(tabBgr->donneesTab[i1][i2][RED], tabBgr->donneesTab[i1][i2][GREEN], tabBgr->donneesTab[i1][i2][BLUE]) ;  
-			tabStructHsv->tabHsv[i1][i2] = hsv ; 
+			hsv = BGRtoHSV( arrayBGR->donneesTab[column][line][BLUE], arrayBGR->donneesTab[column][line][GREEN], arrayBGR->donneesTab[column][line][RED] ) ;  
+			arrayStructHSV->arrayHSV[column][line] = hsv ; 
 		}
 	}
-	return tabStructHsv ; 
+	return arrayStructHSV ; 
 }
 
 //Take a HSV matrix and return a BGR matrix
-DonneesImageTab* tabHsvToTabBgr(tabCouleurHSV* tabStructHsv)
+/* @fonction		:	Conversion of an array of HSV values to an array of BGR values
+ *						
+ * 
+ * @param			:
+ *  arrayStructHSV	: 	Struct with an array of HSV values
+ * 
+ * @retour		 	:	Struct with an array of BGR values 
+ */
+DonneesImageTab* arrayHSVToArrayBGR(arrayColorHSV* arrayStructHSV)
 {
-	couleurRVB rvb ;
-	DonneesImageTab* imageTab ;  
-	int i1, i2 ; 
-	int largeur = tabStructHsv->largeur ; 
-	int hauteur = tabStructHsv->hauteur ; 
-	imageTab = initTab(largeur, hauteur) ;
-	for(i1=0 ; i1<largeur ; i1+=1)
+	colorBGR bgr ;
+	DonneesImageTab* arrayImage ;  
+	int column, line ; 
+	int width = arrayStructHSV->width ; 
+	int height = arrayStructHSV->height ; 
+	arrayImage = initTab(width, height) ;
+	
+	for(column=0 ; column<width ; column+=1)
 	{
-		for(i2=0 ; i2<hauteur ; i2+=1)
+		for(line=0 ; line<height; line+=1)
 		{
-			rvb = HSVtoRGB(tabStructHsv->tabHsv[i1][i2].h, tabStructHsv->tabHsv[i1][i2].s, tabStructHsv->tabHsv[i1][i2].v) ; 
-			imageTab->donneesTab[i1][i2][BLUE] = rvb.b ; 
-			imageTab->donneesTab[i1][i2][GREEN] = rvb.v ; 
-			imageTab->donneesTab[i1][i2][RED] = rvb.r ; 
+			bgr = HSVtoBGR(arrayStructHSV->arrayHSV[column][line].hue, arrayStructHSV->arrayHSV[column][line].saturation, arrayStructHSV->arrayHSV[column][line].value) ; 
+			arrayImage->donneesTab[column][line][BLUE] = bgr.blue ; 
+			arrayImage->donneesTab[column][line][GREEN] = bgr.green ; 
+			arrayImage->donneesTab[column][line][RED] = bgr.red ; 
 		}
 	}
-	return imageTab ; 
+	return arrayImage ; 
 }
 
-couleurRVB HSVtoRGB(float H, float S, float V)
+/* @fonction		:	Return the BGR color equivalent of a HSV color 
+ *						
+ * 
+ * @param			:
+ * 		hue			: 	Hue of a HSV color
+ *      saturation	: 	Saturation of a HSV color
+ * 		value		: 	Value of a HSV color
+ * 
+ * @retour		 	:	Struct with the values of a BGR color
+ */
+colorBGR HSVtoBGR(float hue, float saturation, float value)
 {
 	float c, x, m;
-	float newR, newV, newB, newH ; 
-	float R, G, B;
-	couleurRVB rvb ; 
+	float newRed, newGreen, newBlue, newHue ; 
+	float red, green, blue;
+	colorBGR bgr ; 
 		
-	c = V * S ;
-	newH = H / 60 ; 
-	//printf("newH = %f", newH);
-	//printf("H = %f", H);
-	//printf("c: %f\n", c);
-	x = c * ( 1- (fabs( fmod(newH, 2) - 1  ) ) );
-	//printf("x: %f\n", x); 
-	m = V - c ; 
-	//printf("m: %f\n", m);
-	if(0 <= H && H < 60)
+	c = value * saturation ;
+	newHue = hue / 60 ; 
+	
+	x = c * ( 1- (fabs( fmod(newHue, 2) - 1  ) ) );
+	
+	m = value - c ; 
+	
+	if(0 <= hue && hue < 60)
 	{
 		//printf("if 1 \n");
-		newR = c; 
-		newV = x;
-		newB = 0;
+		newRed = c; 
+		newGreen = x;
+		newBlue = 0;
 	}
-	else if(60 <= H && H < 120)
+	else if(60 <= hue && hue < 120)
 	{
 		//printf("if 2 \n");
-		newR = x; 
-		newV = c;
-		newB = 0;
+		newRed = x; 
+		newGreen = c;
+		newBlue = 0;
 	}
-	else if(120 <= H && H < 180)
+	else if(120 <= hue && hue < 180)
 	{
 		//printf("if 3 \n");
-		newR = 0; 
-		newV = c;
-		newB = x;
+		newRed = 0; 
+		newGreen = c;
+		newBlue = x;
 	}
-	else if(180 <= H && H < 240)
+	else if(180 <= hue && hue < 240)
 	{
 		//printf("if 4 \n");
-		newR = 0; 
-		newV = x;
-		newB = c;
+		newRed = 0; 
+		newGreen = x;
+		newBlue = c;
 		//printf("coucou\n");
 		//printf("r:%f, v:%f, b:%f\n", newR, newV, newB);
 	}
-	else if(240 <= H && H < 300)
+	else if(240 <= hue && hue < 300)
 	{
-		newR = x; 
-		newV = 0;
-		newB = c;
+		newRed = x; 
+		newGreen = 0;
+		newBlue = c;
 	}
-	else if(300 <= H && H < 360)
+	else if(300 <= hue && hue < 360)
 	{
-		newR = c; 
-		newV = 0;
-		newB = x;
+		newRed = c; 
+		newGreen = 0;
+		newBlue = x;
 	}
 	else
 	{
-		newR = 0; 
-		newV = 0;
-		newB = 0;
+		newRed = 0; 
+		newGreen = 0;
+		newBlue = 0;
 	}
 	
-	R = (newR + m) ;
-	G = (newV + m) ; 
-	B = (newB + m) ; 	
+	red = (newRed + m) ;
+	green = (newGreen + m) ; 
+	blue = (newBlue + m) ; 	
 	
-	R = (R * 255) ;
-	G = (G * 255) ;
-	B = (B * 255) ; 
+	red = (red * 255) ;
+	green = (green * 255) ;
+	blue = (blue * 255) ; 
 	
-	rvb.r = R; 
-	rvb.v = G;
-	rvb.b = B;
+	bgr.red = red; 
+	bgr.green = green;
+	bgr.blue = blue;
 	//printf("r:%f, v:%f, b:%f\n", R, G, B);
-	return rvb;
+	return bgr;
 }
 
-void afficheValeurCouleurHSV(matImageHSV* matHSV, int x, int y)
-{
-	printf("x:%d y:%d H:%f S:%f V:%f \n", x, y, matHSV->h[x][y], matHSV->s[x][y], matHSV->v[x][y]);
-	return;
-}
-
-
-//ALLOUE MATRICE - Matrice 2D de type short int
-short int ** alloueMatrice(int h, int l)
-{
-	short int **m ; 
-	int i ;
-	//Alloue tableau de pointeur de pointeur de short int de taille h(auteur)
-	m = (short int **) malloc( sizeof(short int*) * h  );
-	//Pour chaque case du tableau de taille h
-	//on alloue un tableau de pointeur de short int de taille l(argeur)
-	for(i=0;i<h;i++)
-	{
-		m[i] = (short int *)malloc(sizeof(short int)*l);
-	}
-	//on retourne la matrice 2D
-	return m ; 
-}
-
-//ALLOUE MATRICE HSV - Matrice 2D de type float
-float** alloueMatriceFloat(int h, int l)
-{
-	float **m ;
-	int i ;
-	
-	m = (float **)malloc( sizeof(float*) * h);
-	for(i=0 ; i<h ; i++)
-	{
-		m[i] = (float *)malloc(sizeof(float)*l);
-	}
-	//on retourne la matrice 2D
-	return m ; 
-}
 
 
 
